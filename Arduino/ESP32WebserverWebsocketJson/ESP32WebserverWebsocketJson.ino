@@ -22,9 +22,14 @@
 #include <WebSocketsServer.h>                         // needed for instant communication between client and server through Websockets
 #include <ArduinoJson.h>                              // needed for JSON encapsulation (send multiple variables with one string)
 
-// SSID and password of Wifi connection:
-const char* ssid = "TYPE_YOUR_SSID_HERE";
-const char* password = "TYPE_YOUR_PASSWORD_HERE";
+// SSID and password that are going to be used for the Access Point you will create -> DONT use the SSID/Password of your router:
+const char* ssid = "SnipDrop";
+const char* password = "rrndGrl23";
+
+// Configure IP addresses of the local access point
+IPAddress local_IP(192,168,1,22);
+IPAddress gateway(192,168,1,5);
+IPAddress subnet(255,255,255,0);
 
 // The String below "webpage" contains the complete HTML code that is sent to the client whenever someone connects to the webserver
 String webpage = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Lets generate a random number</h1><p>The first random number is: <span id='rand1'>-</span></p><p>The second random number is: <span id='rand2'>-</span></p><p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></p></span></body><script> var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function init() { Socket = new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage = function(event) { processCommand(event); }; } function button_send_back() { var msg = {brand: 'Gibson',type: 'Les Paul Studio',year: 2010,color: 'white'};Socket.send(JSON.stringify(msg)); } function processCommand(event) {var obj = JSON.parse(event.data);document.getElementById('rand1').innerHTML = obj.rand1;document.getElementById('rand2').innerHTML = obj.rand2; console.log(obj.rand1);console.log(obj.rand2); } window.onload = function(event) { init(); }</script></html>";
@@ -43,16 +48,15 @@ WebSocketsServer webSocket = WebSocketsServer(81);    // the websocket uses port
 void setup() {
   Serial.begin(115200);                               // init serial port for debugging
  
-  WiFi.begin(ssid, password);                         // start WiFi interface
-  Serial.println("Establishing connection to WiFi with SSID: " + String(ssid));     // print SSID to the serial interface for debugging
- 
-  while (WiFi.status() != WL_CONNECTED) {             // wait until WiFi is connected
-    delay(1000);
-    Serial.print(".");
-  }
-  Serial.print("Connected to network with IP address: ");
-  Serial.println(WiFi.localIP());                     // show IP address that the ESP32 has received from router
-  
+  Serial.print("Setting up Access Point ... ");
+  Serial.println(WiFi.softAPConfig(local_IP, gateway, subnet) ? "Ready" : "Failed!");
+
+  Serial.print("Starting Access Point ... ");
+  Serial.println(WiFi.softAP(ssid, password) ? "Ready" : "Failed!");
+
+  Serial.print("IP address = ");
+  Serial.println(WiFi.softAPIP());
+
   server.on("/", []() {                               // define here wat the webserver needs to do
     server.send(200, "text/html", webpage);           //    -> it needs to send out the HTML string "webpage" to the client
   });
