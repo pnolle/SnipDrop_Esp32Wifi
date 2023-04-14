@@ -9,7 +9,7 @@ const char* password = "rrndGrl23";
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
-String webpage = "<!DOCTYPE html><html><head><title>Page Title</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Randomizr</h1><p>Random number: <span id='rand'>-</span></p></span></body><script>var Socket; function init(){ Socket=new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage=function(event){ processCommand(event);};} function processCommand(event){ document.getElementById('rand').innerHTML=event.data; console.log(event.data);} window.onload=function(event){ init();}</script></html>";
+String webpage = "<!DOCTYPE html><html><head><title>Websocket bi-directional</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Randomizr</h1><p>Random number: <span id='rand'>-</span></p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></span></body><script>var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function button_send_back(){ Socket.send('Sending back stuff');} function init(){ Socket=new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage=function (event){ processCommand(event);};} function processCommand(event){ document.getElementById('rand').innerHTML=event.data; console.log(event.data);} window.onload=function (event){ init();}</script></html>";
 int interval = 1000;
 unsigned long previousMillis = 0;
 
@@ -31,6 +31,24 @@ void setup() {
   });
   server.begin();
   webSocket.begin();
+  webSocket.onEvent(webSocketEvent);
+}
+
+void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
+  switch (type) {
+    case WStype_DISCONNECTED:
+      Serial.println("Client disconnected");
+      break;
+    case WStype_CONNECTED:
+      Serial.println("Client connected");
+      break;
+    case WStype_TEXT:
+      for (int i=0; i<length; i++) {
+        Serial.print((char)payload[i]);
+      }
+      Serial.println("");
+      break;
+  }
 }
  
 void loop() {
