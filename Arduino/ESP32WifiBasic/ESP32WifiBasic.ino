@@ -10,7 +10,7 @@ const char *password = "rrndGrl23";
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
-String webpage = "<!DOCTYPE html><html><head><title>Json Websocket</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Randomizr</h1><p>Random number: <p><span id='rand1'>-</span></p><p><span id='rand2'>-</span></p></p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></span></body><script>var Socket; document .getElementById('BTN_SEND_BACK') .addEventListener('click', button_send_back); function button_send_back(){ var light_details={ ledNum: Math.floor(Math.random() * 500), r: Math.floor(Math.random() * 255), g: Math.floor(Math.random() * 255), b: Math.floor(Math.random() * 255),}; Socket.send(JSON.stringify(light_details));} function init(event){ Socket=new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage=function (event){ processCommand(event);};} function processCommand(event){ var obj=JSON.parse(event.data); document.getElementById('rand1').innerHTML=obj.rand1; document.getElementById('rand2').innerHTML=obj.rand2; console.log(obj.rand1); console.log(obj.rand2);} window.onload=function (event){ init(event);}; </script></html>";
+String webpage = "<!DOCTYPE html><html><head><title>Json Websocket</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Randomizr</h1><p>Random number: <p><span id='rand1'>-</span></p><p><span id='rand2'>-</span></p></p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></span></body><script>var Socket; document .getElementById('BTN_SEND_BACK') .addEventListener('click', button_send_back); function button_send_back(){ var light_details={ ledNum: 1, r: 2, g: 3, b: 4,}; Socket.send(JSON.stringify(light_details));} function init(event){ Socket=new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage=function (event){ processCommand(event);};} function processCommand(event){ var obj=JSON.parse(event.data); document.getElementById('rand1').innerHTML=obj.rand1; document.getElementById('rand2').innerHTML=obj.rand2; console.log(obj.rand1); console.log(obj.rand2);} window.onload=function (event){ init(event);}; </script></html>";
 int interval = 1000;
 unsigned long previousMillis = 0;
 
@@ -58,10 +58,10 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
     }
     else
     {
-      const char *ledNum = doc_rx["ledNum"];
-      const char *r = doc_rx["r"];
-      const char *g = doc_rx["g"];
-      const char *b = doc_rx["b"];
+      const int ledNum = doc_rx["ledNum"];
+      const int r = doc_rx["r"];
+      const int g = doc_rx["g"];
+      const int b = doc_rx["b"];
       Serial.println("Received lights info:");
       Serial.println("ledNum:" + String(ledNum));
       Serial.println("r:" + String(r));
