@@ -1,67 +1,92 @@
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
+#include <ArduinoJson.h>
 
 // SSID and password of Wifi connection:
-const char* ssid = "SnipDrop";
-const char* password = "rrndGrl23";
+const char *ssid = "SnipDrop";
+const char *password = "rrndGrl23";
 
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
-String webpage = "<!DOCTYPE html><html><head><title>Websocket bi-directional</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Randomizr</h1><p>Random number: <span id='rand'>-</span></p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></span></body><script>var Socket; document.getElementById('BTN_SEND_BACK').addEventListener('click', button_send_back); function button_send_back(){ Socket.send('Sending back stuff');} function init(){ Socket=new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage=function (event){ processCommand(event);};} function processCommand(event){ document.getElementById('rand').innerHTML=event.data; console.log(event.data);} window.onload=function (event){ init();}</script></html>";
+String webpage = "<!DOCTYPE html><html><head><title>Json Websocket</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Randomizr</h1><p>Random number: <p><span id='rand1'>-</span></p><p><span id='rand2'>-</span></p></p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></span></body><script>var Socket; document .getElementById('BTN_SEND_BACK') .addEventListener('click', button_send_back); function button_send_back(){ var light_details={ ledNum: Math.floor(Math.random() * 500), r: Math.floor(Math.random() * 255), g: Math.floor(Math.random() * 255), b: Math.floor(Math.random() * 255),}; Socket.send(JSON.stringify(light_details));} function init(event){ Socket=new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage=function (event){ processCommand(event);};} function processCommand(event){ var obj=JSON.parse(event.data); document.getElementById('rand1').innerHTML=obj.rand1; document.getElementById('rand2').innerHTML=obj.rand2; console.log(obj.rand1); console.log(obj.rand2);} window.onload=function (event){ init(event);}; </script></html>";
 int interval = 1000;
 unsigned long previousMillis = 0;
 
-void setup() {
-  Serial.begin(115200);                 
- 
+StaticJsonDocument<200> doc_tx;
+StaticJsonDocument<200> doc_rx;
+
+void setup()
+{
+  Serial.begin(115200);
+
   WiFi.begin(ssid, password);
   Serial.println("Establishing connection to WiFi with SSID: " + String(ssid));
- 
-  while (WiFi.status() != WL_CONNECTED) {
+
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(1000);
     Serial.print(".");
   }
   Serial.print("Connected to network with IP address: ");
   Serial.println(WiFi.localIP());
 
-  server.on("/", []() {
-    server.send(200, "text\html", webpage);
-  });
+  server.on("/", []()
+            { server.send(200, "text\html", webpage); });
   server.begin();
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
 }
 
-void webSocketEvent(byte num, WStype_t type, uint8_t * payload, size_t length) {
-  switch (type) {
-    case WStype_DISCONNECTED:
-      Serial.println("Client disconnected");
-      break;
-    case WStype_CONNECTED:
-      Serial.println("Client connected");
-      break;
-    case WStype_TEXT:
-      for (int i=0; i<length; i++) {
-        Serial.print((char)payload[i]);
-      }
-      Serial.println("");
-      break;
+void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
+{
+  switch (type)
+  {
+  case WStype_DISCONNECTED:
+    Serial.println("Client disconnected");
+    break;
+  case WStype_CONNECTED:
+    Serial.println("Client connected");
+    break;
+  case WStype_TEXT:
+    DeserializationError error = deserializeJson(doc_rx, payload);
+    if (error)
+    {
+      Serial.println("deserializeJson() failed");
+      return;
+    }
+    else
+    {
+      const char *ledNum = doc_rx["ledNum"];
+      const char *r = doc_rx["r"];
+      const char *g = doc_rx["g"];
+      const char *b = doc_rx["b"];
+      Serial.println("Received lights info:");
+      Serial.println("ledNum:" + String(ledNum));
+      Serial.println("r:" + String(r));
+      Serial.println("g:" + String(g));
+      Serial.println("b:" + String(b));
+    }
+    break;
   }
 }
- 
-void loop() {
+
+void loop()
+{
   server.handleClient();
   webSocket.loop();
 
   unsigned long now = millis();
-  if (now - previousMillis > interval) {
-    String str = String(random(100));
-    int str_len = str.length() + 1;
-    char char_array[str_len];
-    str.toCharArray(char_array, str_len);
-    webSocket.broadcastTXT(char_array);
+  if (now - previousMillis > interval)
+  {
+    String jsonString = "";
+    JsonObject object = doc_tx.to<JsonObject>();
+    object["rand1"] = random(100);
+    object["rand2"] = random(100);
+    serializeJson(doc_tx, jsonString);
+    Serial.println(jsonString);
+    webSocket.broadcastTXT(jsonString);
     previousMillis = now;
   }
 }
