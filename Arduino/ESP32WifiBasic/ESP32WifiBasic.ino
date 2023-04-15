@@ -1,3 +1,8 @@
+
+/*
+ THIS IS THE WI-FI CLIENT PROJECT FOR SnipSign 2.0
+ */
+
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WebSocketsServer.h>
@@ -28,6 +33,8 @@ void setup()
   }
   Serial.print("Connected to network with IP address: ");
   Serial.println(WiFi.localIP());
+  Serial.print("Client has MAC address: ");
+  Serial.println(WiFi.macAddress());
 
   server.on("/", []()
             { server.send(200, "text\html", webpage); });
@@ -38,6 +45,7 @@ void setup()
 
 void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
 {
+  Serial.println("Client webSocketEvent");
   switch (type)
   {
   case WStype_DISCONNECTED:
@@ -53,7 +61,7 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
       Serial.println("deserializeJson() failed");
       return;
     }
-    else
+/*     else
     {
       const int ledNum = doc_rx["ledNum"];
       const int r = doc_rx["r"];
@@ -64,6 +72,13 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
       Serial.println("r:" + String(r));
       Serial.println("g:" + String(g));
       Serial.println("b:" + String(b));
+    } */
+    else {
+      const int apRand1 = doc_rx["apRand1"];
+      const int apRand2 = doc_rx["apRand2"];
+      Serial.println("Client received sth");
+      Serial.println("apRand1:" + String(apRand1));
+      Serial.println("apRand2:" + String(apRand2));
     }
     break;
   }
@@ -82,6 +97,7 @@ void loop()
     object["rand1"] = random(100);
     object["rand2"] = random(100);
     serializeJson(doc_tx, jsonString);
+    Serial.print("Client sending JSON data: ");
     Serial.println(jsonString);
     webSocket.broadcastTXT(jsonString);
     previousMillis = now;
