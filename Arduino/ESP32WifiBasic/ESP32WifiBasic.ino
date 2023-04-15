@@ -2,10 +2,7 @@
 #include <WebServer.h>
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
-
-// SSID and password of Wifi connection:
-const char *ssid = "SnipDrop";
-const char *password = "rrndGrl23";
+#include "secrets.h"  // local variables
 
 WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
