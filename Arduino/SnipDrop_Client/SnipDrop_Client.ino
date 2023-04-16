@@ -1,7 +1,6 @@
-
 /*
- THIS IS THE WI-FI CLIENT PROJECT FOR SnipSign 2.0
- */
+  SnipDrop Client
+*/
 
 #include <WiFi.h>
 #include <WebServer.h>
