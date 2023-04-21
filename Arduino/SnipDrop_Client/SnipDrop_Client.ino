@@ -15,7 +15,7 @@
 // REPLACE WITH THE MAC Address of your receiver 
 // uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 // uint8_t broadcastAddress[] = {0x40, 0x22, 0xD8, 0x5F, 0xD7, 0xDC};  // AP
-xuint8_t broadcastAddress[] = {0xC0, 0x49, 0xEF, 0xCF, 0xAD, 0xFC};  // C1
+uint8_t broadcastAddress[] = {0xC0, 0x49, 0xEF, 0xCF, 0xAD, 0xFC};  // C1
 
 
 // Define variables to store BME280 readings to be sent
@@ -35,8 +35,8 @@ String success;
 
 //Structure example to send data
 //Must match the receiver structure
-    uint16_t ledNum;
 typedef struct struct_message {
+    uint16_t ledNum;
     uint8_t colR;
     uint8_t colG;
     uint8_t colB;
@@ -51,7 +51,7 @@ esp_now_peer_info_t peerInfo;
 
 // Callback when data is sent
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  Serial.print("\r\nLast Packet Send Status:\t");
+  Serial.print("Last Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
   if (status ==0){
     success = "Delivery Success :)";
@@ -64,8 +64,7 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 // Callback when data is received
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
   memcpy(&incomingReadings, incomingData, sizeof(incomingReadings));
-  Serial.print("Bytes received: ");
-  Serial.println(len);
+  Serial.printf("Bytes received:\t[%i]\n", len);
   incomingLedNum = incomingReadings.ledNum;
   incomingColR = incomingReadings.colR;
   incomingColG = incomingReadings.colG;
@@ -74,8 +73,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
 }
 
 void updateDisplay(){
-  Serial.printf("LedNum: [%u] | R:[%u] | G: [%u] | B: [%u]", incomingLedNum, incomingColR, incomingColG, incomingColB);
-  Serial.println();
+  Serial.printf("INCOMING LedNum:\t[%u] | R:[%u] | G: [%u] | B: [%u]\n", incomingLedNum, incomingColR, incomingColG, incomingColB);
 }
  
 void setup() {
@@ -133,4 +131,5 @@ void generateDummyData(){
   colR = random(255);
   colG = random(255);
   colB = random(255);
+  Serial.printf("OUTGOING LedNum:\t[%u] | R:[%u] | G: [%u] | B: [%u]\n", ledNum, colR, colG, colB);
 }
