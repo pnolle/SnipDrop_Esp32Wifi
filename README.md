@@ -5,6 +5,8 @@ This repo contains the ESP32 code for my LED rollup banner project 'SnipSign 2.0
 Getting started with ESPNOW: https://randomnerdtutorials.com/esp-now-two-way-communication-esp32/
 Receive data from multiple boards: https://randomnerdtutorials.com/esp-now-many-to-one-esp32/
 
+Tutorial without sensors + several receivers: https://www.instructables.com/ESP32-With-ESP-Now-Protocol/
+
 ## Installation
 Copy secrets.h_template and rename to secrets.h, fill in SSID and Password for ESP32 Wi-Fi.
 

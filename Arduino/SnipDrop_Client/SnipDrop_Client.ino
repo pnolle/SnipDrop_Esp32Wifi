@@ -1,104 +1,136 @@
 /*
-  SnipDrop Client
+  Rui Santos
+  Complete project details at https://RandomNerdTutorials.com/esp-now-two-way-communication-esp32/
+  
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files.
+  
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 */
 
+#include <esp_now.h>
 #include <WiFi.h>
-#include <WebServer.h>
-#include <WebSocketsServer.h>
-#include <ArduinoJson.h>
-#include "secrets.h"  // local variables
 
-WebServer server(80);
-WebSocketsServer webSocket = WebSocketsServer(81);
+// REPLACE WITH THE MAC Address of your receiver 
+// uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+// uint8_t broadcastAddress[] = {0x40, 0x22, 0xD8, 0x5F, 0xD7, 0xDC};  // AP
+xuint8_t broadcastAddress[] = {0xC0, 0x49, 0xEF, 0xCF, 0xAD, 0xFC};  // C1
 
-String webpage = "<!DOCTYPE html><html><head><title>Json Websocket</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Randomizr</h1><p>Random number: <p><span id='rand1'>-</span></p><p><span id='rand2'>-</span></p></p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></span></body><script>var Socket; document .getElementById('BTN_SEND_BACK') .addEventListener('click', button_send_back); function button_send_back(){ var light_details={ ledNum: 1, r: 2, g: 3, b: 4,}; Socket.send(JSON.stringify(light_details));} function init(event){ Socket=new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage=function (event){ processCommand(event);};} function processCommand(event){ var obj=JSON.parse(event.data); document.getElementById('rand1').innerHTML=obj.rand1; document.getElementById('rand2').innerHTML=obj.rand2; console.log(obj.rand1); console.log(obj.rand2);} window.onload=function (event){ init(event);}; </script></html>";
-int interval = 1000;
-unsigned long previousMillis = 0;
 
-StaticJsonDocument<200> doc_tx;
-StaticJsonDocument<200> doc_rx;
+// Define variables to store BME280 readings to be sent
+uint16_t ledNum;
+uint8_t colR;
+uint8_t colG;
+uint8_t colB;
 
-void setup()
-{
+// Define variables to store incoming readings
+uint16_t incomingLedNum;
+uint8_t incomingColR;
+uint8_t incomingColG;
+uint8_t incomingColB;
+
+// Variable to store if sending data was successful
+String success;
+
+//Structure example to send data
+//Must match the receiver structure
+    uint16_t ledNum;
+typedef struct struct_message {
+    uint8_t colR;
+    uint8_t colG;
+    uint8_t colB;
+} struct_message;
+
+// Create a struct_message for dummy data
+struct_message DummyData;
+// Create a struct_message to hold incoming data
+struct_message incomingReadings;
+
+esp_now_peer_info_t peerInfo;
+
+// Callback when data is sent
+void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+  Serial.print("\r\nLast Packet Send Status:\t");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+  if (status ==0){
+    success = "Delivery Success :)";
+  }
+  else{
+    success = "Delivery Fail :(";
+  }
+}
+
+// Callback when data is received
+void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
+  memcpy(&incomingReadings, incomingData, sizeof(incomingReadings));
+  Serial.print("Bytes received: ");
+  Serial.println(len);
+  incomingLedNum = incomingReadings.ledNum;
+  incomingColR = incomingReadings.colR;
+  incomingColG = incomingReadings.colG;
+  incomingColB = incomingReadings.colB;
+  updateDisplay();
+}
+
+void updateDisplay(){
+  Serial.printf("LedNum: [%u] | R:[%u] | G: [%u] | B: [%u]", incomingLedNum, incomingColR, incomingColG, incomingColB);
+  Serial.println();
+}
+ 
+void setup() {
+  // Init Serial Monitor
   Serial.begin(115200);
 
-  WiFi.begin(ssid, password);
-  Serial.println("Establishing connection to WiFi with SSID: " + String(ssid));
+  // Set device as a Wi-Fi Station
+  WiFi.mode(WIFI_STA);
 
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(1000);
-    Serial.print(".");
+  // Init ESP-NOW
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Error initializing ESP-NOW");
+    return;
   }
-  Serial.print("Connected to network with IP address: ");
-  Serial.println(WiFi.localIP());
-  Serial.print("Client has MAC address: ");
-  Serial.println(WiFi.macAddress());
 
-  server.on("/", []()
-            { server.send(200, "text\html", webpage); });
-  server.begin();
-  webSocket.begin();
-  webSocket.onEvent(webSocketEvent);
+  // Once ESPNow is successfully Init, we will register for Send CB to
+  // get the status of Trasnmitted packet
+  esp_now_register_send_cb(OnDataSent);
+  
+  // Register peer
+  memcpy(peerInfo.peer_addr, broadcastAddress, 6);
+  peerInfo.channel = 0;  
+  peerInfo.encrypt = false;
+  
+  // Add peer        
+  if (esp_now_add_peer(&peerInfo) != ESP_OK){
+    Serial.println("Failed to add peer");
+    return;
+  }
+  // Register for a callback function that will be called when data is received
+  esp_now_register_recv_cb(OnDataRecv);
+}
+ 
+void loop() {
+  generateDummyData();
+  DummyData.ledNum = ledNum;
+  DummyData.colR = colR;
+  DummyData.colG = colG;
+  DummyData.colB = colB;
+
+  // Send message via ESP-NOW
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &DummyData, sizeof(DummyData));
+   
+  if (result == ESP_OK) {
+    Serial.println("Sent with success");
+  }
+  else {
+    Serial.println("Error sending the data");
+  }
+  delay(3000);
 }
 
-void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
-{
-  Serial.println("Client webSocketEvent");
-  switch (type)
-  {
-  case WStype_DISCONNECTED:
-    Serial.println("Client disconnected");
-    break;
-  case WStype_CONNECTED:
-    Serial.println("Client connected");
-    break;
-  case WStype_TEXT:
-    DeserializationError error = deserializeJson(doc_rx, payload);
-    if (error)
-    {
-      Serial.println("deserializeJson() failed");
-      return;
-    }
-/*     else
-    {
-      const int ledNum = doc_rx["ledNum"];
-      const int r = doc_rx["r"];
-      const int g = doc_rx["g"];
-      const int b = doc_rx["b"];
-      Serial.println("Received lights info:");
-      Serial.println("ledNum:" + String(ledNum));
-      Serial.println("r:" + String(r));
-      Serial.println("g:" + String(g));
-      Serial.println("b:" + String(b));
-    } */
-    else {
-      const int apRand1 = doc_rx["apRand1"];
-      const int apRand2 = doc_rx["apRand2"];
-      Serial.println("Client received sth");
-      Serial.println("apRand1:" + String(apRand1));
-      Serial.println("apRand2:" + String(apRand2));
-    }
-    break;
-  }
-}
-
-void loop()
-{
-  server.handleClient();
-  webSocket.loop();
-
-  unsigned long now = millis();
-  if (now - previousMillis > interval)
-  {
-    String jsonString = "";
-    JsonObject object = doc_tx.to<JsonObject>();
-    object["rand1"] = random(100);
-    object["rand2"] = random(100);
-    serializeJson(doc_tx, jsonString);
-    Serial.print("Client sending JSON data: ");
-    Serial.println(jsonString);
-    webSocket.broadcastTXT(jsonString);
-    previousMillis = now;
-  }
+void generateDummyData(){
+  ledNum = random(500);
+  colR = random(255);
+  colG = random(255);
+  colB = random(255);
 }
