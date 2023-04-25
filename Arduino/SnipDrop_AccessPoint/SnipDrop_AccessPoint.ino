@@ -20,7 +20,7 @@ String webpage = "<!DOCTYPE html><html><head><title>Access Point</title></head><
 // -> in the video I used global variables for "doc_tx" and "doc_rx", however, I now changed this in the code to local variables instead "doc" -> Arduino documentation recomends to use local containers instead of global to prevent data corruption
 
 // We want to periodically send values to the clients, so we need to define an "interval" and remember the last time we sent data to the client (with "previousMillis")
-int interval = 1000;              // send data to the client every 1000ms -> 1s
+int interval = 40;              // send data to the client every 1000ms -> 1s
 unsigned long previousMillis = 0; // we use the "millis()" command for time reference and this will output an unsigned long
 
 StaticJsonDocument<200> doc_tx;
@@ -65,7 +65,7 @@ void setup()
   // wifiServer.begin();
 
   webSocket.begin();                 // start websocket
-  webSocket.onEvent(webSocketEvent); // define a callback function -> what does the ESP32 need to do when an event from the websocket is received? -> run function "webSocketEvent()"
+  //webSocket.onEvent(webSocketEvent); // define a callback function -> what does the ESP32 need to do when an event from the websocket is received? -> run function "webSocketEvent()"
 }
 
 void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
@@ -153,8 +153,6 @@ void loop()
     object["colG"] = DummyData.colG;
     object["colB"] = DummyData.colB;
 
-    // object["apRand1"] = random(100);
-    // object["apRand2"] = random(100);
     serializeJson(doc, jsonString); // convert JSON object to string
     Serial.print("AP sending JSON data: ");
     Serial.println(jsonString);         // print JSON string to console for debug purposes (you can comment this out)
@@ -166,9 +164,9 @@ void loop()
 
 
 void generateDummyData(){
-  DummyData.ledNum = random(60)+10;
+  DummyData.ledNum = random(500);
   DummyData.colR = random(255);
   DummyData.colG = random(255);
   DummyData.colB = random(255);
-  Serial.printf("OUTGOING LedNum:\t[%u] | R:[%u] | G: [%u] | B: [%u]\n", DummyData.ledNum, DummyData.colR, DummyData.colG, DummyData.colB);
+  //Serial.printf("OUTGOING LedNum:\t[%u] | R:[%u] | G: [%u] | B: [%u]\n", DummyData.ledNum, DummyData.colR, DummyData.colG, DummyData.colB);
 }

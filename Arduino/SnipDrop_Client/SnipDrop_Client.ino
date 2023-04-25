@@ -22,7 +22,8 @@
 #include "dummypixels.h"
 
 // How many leds in your strip?
-#define NUM_LEDS 452 // 452 LEDs in Arrow
+#define NUM_LEDS 500 // Half Circle Dummy
+// #define NUM_LEDS 452 // 452 LEDs in Arrow
 // #define NUM_LEDS 515 // 515 LEDs in Laser v2 + Scissors
 // #define NUM_LEDS 507  // 507 LEDs in Circle
 
@@ -39,13 +40,12 @@
 CRGB leds[NUM_LEDS];
 
 uint16_t previousDataLength = 0;
-int frameNo = 0;
 
 WebServer server(80);
 WebSocketsClient webSocket;
 
 String webpage = "<!DOCTYPE html><html><head><title>Client</title></head><body style='background-color: #EEEEEE;'><span style='color: #003366;'><h1>Randomizr</h1><p>Random number: <p><span id='rand1'>-</span></p><p><span id='rand2'>-</span></p></p><button type='button' id='BTN_SEND_BACK'>Send info to ESP32</button></span></body><script>var Socket; document .getElementById('BTN_SEND_BACK') .addEventListener('click', button_send_back); function button_send_back(){ var light_details={ ledNum: 1, r: 2, g: 3, b: 4,}; Socket.send(JSON.stringify(light_details));} function init(event){ Socket=new WebSocket('ws://' + window.location.hostname + ':81/'); Socket.onmessage=function (event){ processCommand(event);};} function processCommand(event){ var obj=JSON.parse(event.data); document.getElementById('rand1').innerHTML=obj.rand1; document.getElementById('rand2').innerHTML=obj.rand2; console.log(obj.rand1); console.log(obj.rand2);} window.onload=function (event){ init(event);}; </script></html>";
-int interval = 1000;
+int interval = 100;
 unsigned long previousMillis = 0;
 
 StaticJsonDocument<200> doc_tx;
@@ -88,13 +88,13 @@ void setup()
 // void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
-  Serial.println("Client webSocketEvent");
+  // Serial.println("Client webSocketEvent");
   if (type == WStype_TEXT)
   {
     parseJsonMessage(payload);
     // previousDataLength = length;
     FastLED.show();
-    frameNo++;
+		fadeall();
   }
 }
 
@@ -115,8 +115,20 @@ void parseJsonMessage(uint8_t *payload)
     uint8_t colR = doc["colR"];
     uint8_t colG = doc["colG"];
     uint8_t colB = doc["colB"];
-    Serial.printf("Client received:\tledNum: %u | colR: %u | colG: %u | colB: %u", ledNum, colR, colG, colB);
-    setLedRegions(ledNum, colR, colG, colB);
+    // Serial.printf("Client received:\tledNum: %u | colR: %u | colG: %u | colB: %u\n", ledNum, colR, colG, colB);
+    // setLedRegions(ledNum, colR, colG, colB);
+    setSingleLed(ledNum, colR, colG, colB);
+  }
+}
+
+void setSingleLed(uint16_t pxNum, uint8_t r, uint8_t g, uint8_t b)
+{
+  leds[pxNum] = CRGB(r, g, b);
+}
+
+void fadeall() { 
+  for(int i = 0; i < NUM_LEDS; i++) { 
+    leds[i].nscale8(250); 
   }
 }
 
@@ -223,11 +235,9 @@ void setLedRegions(uint16_t pxNum, uint8_t incomingColR, uint8_t incomingColG, u
 
 void setLedValues(int16_t thisCount, const int16_t *thisRegion, uint8_t r, uint8_t g, uint8_t b)
 {
-  // printf("setting %i LedValues #%i \tpxNum: %i | dataNo: %u\n", thisCount, dataNo, pxNum);
   for (int l = 0; l < thisCount; l++)
   {
     leds[thisRegion[l]] = CRGB(r, g, b);
-    // if (l==0) printf("led %i of region %i \tr: %i | g: %i | b: %i\n", l, pxNum, data[dataNo * 3], data[dataNo * 3 + 1], data[dataNo * 3 + 2]);
   }
 }
 
