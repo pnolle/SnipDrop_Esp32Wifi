@@ -46,6 +46,7 @@ void setup()
   Serial.print("Client has MAC address: ");
   Serial.println(WiFi.macAddress());
 
+  // TODO: Clients should be able to send some kind of feedback. Figure out if it's better to use the webserver or websockets back to AP or the WebSerial lib (https://randomnerdtutorials.com/esp32-webserial-library/)
   server.on("/", []()
             { server.send(200, "text\html", webpage); });
   server.begin();
