@@ -40,6 +40,8 @@
 CRGB leds[NUM_LEDS];
 
 uint16_t previousDataLength = 0;
+uint8_t universe = 0;
+uint8_t startUniverse = 0;
 
 WebServer server(80);
 WebSocketsClient webSocket;
@@ -88,13 +90,32 @@ void setup()
 // void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
 void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
 {
-  // Serial.println("Client webSocketEvent");
+  Serial.printf("Client webSocketEvent %u\n", payload);
   if (type == WStype_TEXT)
   {
-    parseJsonMessage(payload);
+    // parseJsonMessage(payload);
+
+    // read universe and put into the right part of the display buffer
+    // using length/3 because 3 values define r/g/b of one pixel
+    //    for (int dataNo = 0; dataNo < length / 3; dataNo++)
+    for (int dataNo = 0; dataNo < NUM_LEDS; dataNo++)
+    {
+      int pxNum = dataNo; // + (universe - startUniverse) * (previousDataLength / 3);
+      // Serial.printf("%i + (%u - %u) * (%u / 3) = %i<%i\n", dataNo, universe, startUniverse, previousDataLength, pxNum, pxTotal);
+
+      uint16_t ledNum = pxNum;
+      uint8_t colR = payload[dataNo * 3];
+      uint8_t colG = payload[dataNo * 3 + 1];
+      uint8_t colB = payload[dataNo * 3 + 2];
+
+      Serial.printf("Client received:\tledNum: %u | colR: %u | colG: %u | colB: %u\n", ledNum, colR, colG, colB);
+      // setLedRegions(ledNum, colR, colG, colB);
+      setSingleLed(ledNum, colR, colG, colB);
+    }
+
     // previousDataLength = length;
     FastLED.show();
-		fadeall();
+    fadeall();
   }
 }
 
@@ -126,9 +147,11 @@ void setSingleLed(uint16_t pxNum, uint8_t r, uint8_t g, uint8_t b)
   leds[pxNum] = CRGB(r, g, b);
 }
 
-void fadeall() { 
-  for(int i = 0; i < NUM_LEDS; i++) { 
-    leds[i].nscale8(250); 
+void fadeall()
+{
+  for (int i = 0; i < NUM_LEDS; i++)
+  {
+    leds[i].nscale8(250);
   }
 }
 
