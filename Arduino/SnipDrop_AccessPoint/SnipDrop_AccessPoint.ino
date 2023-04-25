@@ -26,6 +26,19 @@ unsigned long previousMillis = 0; // we use the "millis()" command for time refe
 StaticJsonDocument<200> doc_tx;
 StaticJsonDocument<200> doc_rx;
 
+// Structure example to send data
+// Must match the receiver structure
+typedef struct struct_message
+{
+  uint16_t ledNum;
+  uint8_t colR;
+  uint8_t colG;
+  uint8_t colB;
+} struct_message;
+
+// Create a struct_message for dummy data
+struct_message DummyData;
+
 // Initialization of webserver and websocket
 WebServer server(80);
 // WiFiServer wifiServer(80);
@@ -72,7 +85,7 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
   break;
   case WStype_TEXT:
     Serial.printf("[%u] Text: %s\n", num, payload);
-    webSocket.sendTXT(num, payload);
+    //webSocket.sendTXT(num, payload);
 
     parseJsonMessage(payload);
     break;
@@ -119,12 +132,29 @@ void loop()
   unsigned long now = millis(); // read out the current "time" ("millis()" gives the time in ms since the Arduino started)
   if ((unsigned long)(now - previousMillis) > interval)
   { // check if "interval" ms has passed since last time the clients were updated
+    generateDummyData();
 
+    // // Send message via ESP-NOW
+    // esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &DummyData, sizeof(DummyData));
+    
+    // if (result == ESP_OK) {
+    //   Serial.println("Sent with success");
+    // }
+    // else {
+    //   Serial.println("Error sending the data");
+    // }
+  
     String jsonString = "";                   // create a JSON string for sending data to the client
     StaticJsonDocument<200> doc;              // create a JSON container
     JsonObject object = doc.to<JsonObject>(); // create a JSON Object
-    object["apRand1"] = random(100);
-    object["apRand2"] = random(100);
+
+    object["ledNum"] = DummyData.ledNum;
+    object["colR"] = DummyData.colR;
+    object["colG"] = DummyData.colG;
+    object["colB"] = DummyData.colB;
+
+    // object["apRand1"] = random(100);
+    // object["apRand2"] = random(100);
     serializeJson(doc, jsonString); // convert JSON object to string
     Serial.print("AP sending JSON data: ");
     Serial.println(jsonString);         // print JSON string to console for debug purposes (you can comment this out)
@@ -132,4 +162,13 @@ void loop()
 
     previousMillis = now; // reset previousMillis
   }
+}
+
+
+void generateDummyData(){
+  DummyData.ledNum = random(60)+10;
+  DummyData.colR = random(255);
+  DummyData.colG = random(255);
+  DummyData.colB = random(255);
+  Serial.printf("OUTGOING LedNum:\t[%u] | R:[%u] | G: [%u] | B: [%u]\n", DummyData.ledNum, DummyData.colR, DummyData.colG, DummyData.colB);
 }

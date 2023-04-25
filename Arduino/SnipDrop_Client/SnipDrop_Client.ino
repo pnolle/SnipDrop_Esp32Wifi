@@ -13,11 +13,33 @@
 
 */
 
+#include <FastLED.h>
 #include <WiFi.h>
 #include <WebServer.h>
 #include <WebSocketsClient.h>
 #include <ArduinoJson.h>
 #include "secrets.h" // local variables
+#include "dummypixels.h"
+
+// How many leds in your strip?
+#define NUM_LEDS 452 // 452 LEDs in Arrow
+// #define NUM_LEDS 515 // 515 LEDs in Laser v2 + Scissors
+// #define NUM_LEDS 507  // 507 LEDs in Circle
+
+#define NUM_ROWS 5
+#define NUM_COLS 10
+
+// For led chips like Neopixels, which have a data line, ground, and power, you just
+// need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
+// ground, and power), like the LPD8806, define both DATA_PIN and CLOCK_PIN
+#define DATA_PIN 12
+// #define CLOCK_PIN 13
+
+// Define the array of leds
+CRGB leds[NUM_LEDS];
+
+uint16_t previousDataLength = 0;
+int frameNo = 0;
 
 WebServer server(80);
 WebSocketsClient webSocket;
@@ -35,6 +57,10 @@ void setup()
 
   WiFi.begin(ssid, password);
   Serial.println("Establishing connection to WiFi with SSID: " + String(ssid));
+
+  // init LEDs
+  FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.setBrightness(255);
 
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -65,8 +91,10 @@ void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
   Serial.println("Client webSocketEvent");
   if (type == WStype_TEXT)
   {
-    Serial.printf("Text: %s\n", payload);
     parseJsonMessage(payload);
+    // previousDataLength = length;
+    FastLED.show();
+    frameNo++;
   }
 }
 
@@ -83,13 +111,124 @@ void parseJsonMessage(uint8_t *payload)
   }
   else
   {
-    const int apRand1 = doc["apRand1"];
-    const int apRand2 = doc["apRand2"];
-    Serial.println("Client received sth");
-    Serial.println("apRand1:" + String(apRand1));
-    Serial.println("apRand2:" + String(apRand2));
+    uint16_t ledNum = doc["ledNum"];
+    uint8_t colR = doc["colR"];
+    uint8_t colG = doc["colG"];
+    uint8_t colB = doc["colB"];
+    Serial.printf("Client received:\tledNum: %u | colR: %u | colG: %u | colB: %u", ledNum, colR, colG, colB);
+    setLedRegions(ledNum, colR, colG, colB);
   }
-  Serial.println("");
+}
+
+void setLedRegions(uint16_t pxNum, uint8_t incomingColR, uint8_t incomingColG, uint8_t incomingColB)
+{
+  int16_t thisCount = 0;
+  const int16_t *thisRegion;
+
+  // printf("setLedValues #%i \tpxNum: %i | dataNo: %u\n", dataNo, pxNum);
+
+  switch (pxNum)
+  {
+  // row 1
+  case 10:
+    thisCount = len_p11_1;
+    thisRegion = p11_1;
+    break;
+  case 11:
+    thisCount = len_p12_1;
+    thisRegion = p12_1;
+    break;
+  case 12:
+    thisCount = len_p13_1;
+    thisRegion = p13_1;
+    break;
+  case 13:
+    thisCount = len_p14_1;
+    thisRegion = p14_1;
+    break;
+  case 14:
+    thisCount = len_p15_1;
+    thisRegion = p15_1;
+    break;
+
+  // row 2
+  case 23:
+    thisCount = len_p14_2;
+    thisRegion = p14_2;
+    break;
+  case 24:
+    thisCount = len_p15_2;
+    thisRegion = p15_2;
+    break;
+  case 25:
+    thisCount = len_p16_2;
+    thisRegion = p16_2;
+    break;
+
+  // row 3
+  case 35:
+    thisCount = len_p16_3;
+    thisRegion = p16_3;
+    break;
+  case 36:
+    thisCount = len_p17_3;
+    thisRegion = p17_3;
+    break;
+  case 37:
+    thisCount = len_p18_3;
+    thisRegion = p18_3;
+    break;
+
+  // row 4
+  case 46:
+    thisCount = len_p17_4;
+    thisRegion = p17_4;
+    break;
+  case 47:
+    thisCount = len_p18_4;
+    thisRegion = p18_4;
+    break;
+  case 48:
+    thisCount = len_p19_4;
+    thisRegion = p19_4;
+    break;
+
+  // row 5
+  case 58:
+    thisCount = len_p19_5;
+    thisRegion = p19_5;
+    break;
+  case 59:
+    thisCount = len_p20_5;
+    thisRegion = p20_5;
+    break;
+  case 60:
+    thisCount = len_p21_5;
+    thisRegion = p21_5;
+    break;
+
+  // row 6
+  case 69:
+    thisCount = len_p20_6;
+    thisRegion = p20_6;
+    break;
+  case 70:
+    thisCount = len_p21_6;
+    thisRegion = p21_6;
+    break;
+  }
+  // setLedValues(thisCount, thisRegion, data[dataNo * 3], data[dataNo * 3 + 1], data[dataNo * 3 + 2]);
+  setLedValues(thisCount, thisRegion, incomingColR, incomingColG, incomingColB);
+}
+
+void setLedValues(int16_t thisCount, const int16_t *thisRegion, uint8_t r, uint8_t g, uint8_t b)
+{
+  // printf("setting %i LedValues #%i \tpxNum: %i | dataNo: %u\n", thisCount, dataNo, pxNum);
+  for (int l = 0; l < thisCount; l++)
+  {
+    leds[thisRegion[l]] = CRGB(r, g, b);
+    // if (l==0) printf("led %i of region %i \tr: %i | g: %i | b: %i\n", l, pxNum, data[dataNo * 3], data[dataNo * 3 + 1], data[dataNo * 3 + 2]);
+  }
 }
 
 void loop()
