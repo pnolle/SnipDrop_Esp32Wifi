@@ -1,5 +1,10 @@
 /*
   SnipDrop Client
+
+  Establishing connection to WiFi with SSID: SnipDrop
+  Connected to network with IP address: 192.168.1.23
+  Client has MAC address: C0:49:EF:CF:AD:FC
+
 */
 
 #include <WiFi.h>
@@ -48,11 +53,15 @@ void webSocketEvent(byte num, WStype_t type, uint8_t *payload, size_t length)
   switch (type)
   {
   case WStype_DISCONNECTED:
-    Serial.println("Client disconnected");
+    Serial.printf("[%u] disconnected!\n", num);
     break;
   case WStype_CONNECTED:
-    Serial.println("Client connected");
-    break;
+  {
+    IPAddress ip = webSocket.remoteIP(num);
+    Serial.printf("[%u] Connection from ", num);
+    Serial.println(ip.toString());
+  }
+  break;
   case WStype_TEXT:
     DeserializationError error = deserializeJson(doc_rx, payload);
     if (error)
