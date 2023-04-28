@@ -1,5 +1,5 @@
 # SnipDrop
-This repo contains the ESP32 code for my LED rollup banner project 'SnipSign 2.0'. Is uses Expressif's ESPNOW standard to directly communicate between several ESP32s.
+This repo contains the ESP32 code for my LED rollup banner project 'SnipDrop'. Is uses Expressif's ESPNOW standard to directly communicate between several ESP32s.
 
 ## Sources
 Getting started with ESPNOW: https://randomnerdtutorials.com/esp-now-two-way-communication-esp32/
