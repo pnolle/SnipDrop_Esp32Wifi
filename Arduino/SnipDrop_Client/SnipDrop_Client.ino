@@ -53,6 +53,34 @@ unsigned long previousMillis = 0;
 StaticJsonDocument<200> doc_tx;
 StaticJsonDocument<200> doc_rx;
 
+
+void initTest()
+{
+  for (int i = 0 ; i < NUM_LEDS ; i++)
+  {
+    leds[i] = CRGB(127, 0, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0 ; i < NUM_LEDS ; i++)
+  {
+    leds[i] = CRGB(0, 127, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0 ; i < NUM_LEDS ; i++)
+  {
+    leds[i] = CRGB(0, 0, 127);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0 ; i < NUM_LEDS ; i++)
+  {
+    leds[i] = CRGB(0, 0, 0);
+  }
+  FastLED.show();
+}
+
 void setup()
 {
   Serial.begin(115200);
@@ -63,6 +91,7 @@ void setup()
   // init LEDs
   FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds, NUM_LEDS);
   FastLED.setBrightness(255);
+  initTest();
 
   while (WiFi.status() != WL_CONNECTED)
   {

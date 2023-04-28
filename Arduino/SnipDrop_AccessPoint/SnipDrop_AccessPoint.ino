@@ -95,8 +95,9 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
   // using length/3 because 3 values define r/g/b of one pixel
   for (int dataNo = 0; dataNo < length / 3; dataNo++)
   {
-    // int pxNum = dataNo + (universe - startUniverse) * (previousDataLength / 3);
-    // Serial.printf("%i + (%u - %u) * (%u / 3) = %i<%i\n", dataNo, universe, startUniverse, previousDataLength, pxNum, pxTotal);
+//    int pxNum = dataNo + (universe - startUniverse) * (previousDataLength / 3);
+//    Serial.printf("%i + (%u - %u) * (%u / 3) = %i<%i\n", dataNo, universe, startUniverse, previousDataLength, pxNum, length);
+//    Serial.printf("r %i | g %i | b %i\n", data[dataNo * 3], data[dataNo * 3 + 1], data[dataNo * 3 + 2]);
 
     //  array.add(pxNum);
     array.add(data[dataNo * 3]);
