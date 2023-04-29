@@ -14,10 +14,13 @@ const char* password = "dueddelschi_g21";
 // const char* password = "pAsSwOrD";
 
 // LED settings
-const int numLeds = 300; // CHANGE FOR YOUR SETUP
-const int numberOfChannels = numLeds * 3; // Total number of channels you want to receive (1 led = 3 channels)
+const int numLeds = 300;
+const int numLeds2 = 150;
+const int numberOfChannels = (numLeds + numLeds2) * 3 ; // Total number of channels you want to receive (1 led = 3 channels)
 const byte dataPin = 12;
+const byte dataPin2 = 14;
 CRGB leds[numLeds];
+CRGB leds2[numLeds2];
 
 // Art-Net settings
 ArtnetWifi artnet;
@@ -96,6 +99,33 @@ void initTest()
   FastLED.show();
 }
 
+void initTest2()
+{
+  for (int i = 0 ; i < numLeds ; i++)
+  {
+    leds2[i] = CRGB(127, 0, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0 ; i < numLeds2 ; i++)
+  {
+    leds2[i] = CRGB(0, 127, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0 ; i < numLeds2 ; i++)
+  {
+    leds2[i] = CRGB(0, 0, 127);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0 ; i < numLeds2 ; i++)
+  {
+    leds2[i] = CRGB(0, 0, 0);
+  }
+  FastLED.show();
+}
+
 void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* data)
 {
   sendFrame = 1;
@@ -137,12 +167,22 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* d
   for (int i = 0; i < length / 3; i++)
   {
     // index is the first relevant universe
-    int led = i + ((index-1) * 170);
-    // Serial.printf("onDmxFrame led%i/%i %u/%u %u %u %i %i\n", led, numLeds, universe, maxUniverses, length, sequence, index, sendFrame);
-    if (led < numLeds)
-    {
-      leds[led] = CRGB(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
-      //Serial.printf("ledNo %i | r %i | g %i | b %i\n", led, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+    if (index < 3) {
+      int led = i + ((index-1) * 170);
+      // Serial.printf("onDmxFrame led%i/%i %u/%u %u %u %i %i\n", led, numLeds, universe, maxUniverses, length, sequence, index, sendFrame);
+      if (led < numLeds)
+      {
+          leds[led] = getColors(i, data);
+        //Serial.printf("ledNo %i | r %i | g %i | b %i\n", led, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+      }
+    } else {
+      int led = i; // + ((index-1) * 170);
+      //Serial.printf("onDmxFrame led%i/%i %u/%u %u %u %i %i\n", led, numLeds2, universe, maxUniverses, length, sequence, index, sendFrame);
+      if (led < numLeds2)
+      {
+          leds2[led] = getColors(i, data);
+          //Serial.printf("ledNo %i | index %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+      }
     }
   }
 
@@ -154,14 +194,20 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* d
   }
 }
 
+CRGB getColors(int i, uint8_t* data) {
+  return CRGB(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+}
+
+
 void setup()
 {
   Serial.begin(115200);
   ConnectWifi();
   artnet.begin();
- // FastLED.addLeds<WS2812, dataPin, GRB>(leds, numLeds);
   FastLED.addLeds<WS2813, dataPin, GRB>(leds, numLeds);
+  FastLED.addLeds<WS2813, dataPin2, GRB>(leds2, numLeds2);
   initTest();
+  initTest2();
 
   memset(universesReceived, 0, maxUniverses);
   // this will be called for each packet received
