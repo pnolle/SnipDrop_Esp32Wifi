@@ -13,12 +13,12 @@ This example may be copied under the terms of the MIT license, see the LICENSE f
 // #define NUM_LEDS_C 507 // 507 leds_A in Circle
 // #define NUM_LEDS_A 452 // 452 leds_A in Arrow
 // #define NUM_LEDS_L 515 // 515 leds_A in Laser v2 + Scissors
-#define NUM_LEDS_C 300;
-#define NUM_LEDS_A 300;
-#define NUM_LEDS_L 150;
+const int NUM_LEDS_C = 300;
+const int NUM_LEDS_A = 300;
+const int NUM_LEDS_L = 150;
 
-#define START_UNIVERSE_A 3;
-#define START_UNIVERSE_L 4;
+const int START_UNIVERSE_A = 3;
+const int START_UNIVERSE_L = 4;
 
 const int numberOfChannels = (NUM_LEDS_C + NUM_LEDS_A + NUM_LEDS_L) * 3 ; // Total number of receive channels (1 led = 3 channels)
 const byte dataPin_C = 12;
@@ -39,7 +39,7 @@ bool sendFrame = 1;
 
 
 // connect to wifi – returns true if successful or false if not
-bool connectWifi(void)
+bool connectWifi()
 {
   bool state = true;
   int i = 0;
@@ -73,7 +73,7 @@ bool connectWifi(void)
   {
     Serial.println("");
     Serial.println("Connection failed.");
-    connectWifi(void);
+    connectWifi();
   }
 
   return state;
@@ -89,7 +89,7 @@ void initTest()
   {
     leds_A[i] = CRGB(127, 0, 0);
   }
-  for (int i = 0 ; i < NUM_LEDS_AL; i++)
+  for (int i = 0 ; i < NUM_LEDS_A; i++)
   {
     leds_L[i] = CRGB(127, 0, 0);
   }
