@@ -18,7 +18,7 @@ const int NUM_LEDS_A = 300;
 const int NUM_LEDS_L = 150;
 
 const int START_UNIVERSE_A = 3;
-const int START_UNIVERSE_L = 4;
+const int START_UNIVERSE_L = 5;
 
 const int numberOfChannels = (NUM_LEDS_C + NUM_LEDS_A + NUM_LEDS_L) * 3 ; // Total number of receive channels (1 led = 3 channels)
 const byte dataPin_C = 12;
@@ -89,7 +89,7 @@ void initTest()
   {
     leds_A[i] = CRGB(127, 0, 0);
   }
-  for (int i = 0 ; i < NUM_LEDS_A; i++)
+  for (int i = 0 ; i < NUM_LEDS_L; i++)
   {
     leds_L[i] = CRGB(127, 0, 0);
   }
@@ -153,16 +153,16 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* d
   {
     return;
   }
-  uint8_t index = universe - startUniverse;
+  uint8_t thisUniverse = universe - startUniverse;
   
-  //if (index >= maxUniverses)
-  if (index > maxUniverses)
+  //if (thisUniverse >= maxUniverses)
+  if (thisUniverse > maxUniverses)
   {
     return;
   }
 
 //  // Store which universe has got in
-//  universesReceived[index] = true;
+//  universesReceived[thisUniverse] = true;
 //
 //  for (int i = 0 ; i < maxUniverses ; i++)
 //  {
@@ -173,35 +173,35 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* d
 //    }
 //  }
 
-  //Serial.printf("onDmxFrame %u/%u %u %u %i %i\n", universe, maxUniverses, length, sequence, index, sendFrame);
+  //Serial.printf("onDmxFrame %u/%u %u %u %i %i\n", universe, maxUniverses, length, sequence, thisUniverse, sendFrame);
   
   // read universe and put into the right part of the display buffer
   for (int i = 0; i < length / 3; i++)
   {
-    // index is the first relevant universe
-    if (index < START_UNIVERSE_A) { // this is the C strip
-      int led = i + ((index-1) * 170);
-      Serial.printf("C-STRIP led%i/%i %u/%u-%i %u %u %i %i\n", led, NUM_LEDS_C, universe, maxUniverses, 0, length, sequence, index, sendFrame);
+    // thisUniverse is the first relevant universe
+    if (thisUniverse < START_UNIVERSE_A) { // this is the C strip 1+2
+      int led = i + ((thisUniverse-1) * 170);  // for thisUniverse==1 ? led start at 0 : led start at 170
+      // Serial.printf("C-STRIP from 0 to %i \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_A-1, led, NUM_LEDS_C, universe, maxUniverses, 0, length, sequence, thisUniverse, sendFrame);
       if (led < NUM_LEDS_C)
       {
           leds_C[led] = getColors(i, data);
-          Serial.printf("ledNo %i | r %i | g %i | b %i\n", led, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+          // Serial.printf("ledNo %i | r %i | g %i | b %i\n", led, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
       }
-    } else if (index >= START_UNIVERSE_A && index < START_UNIVERSE_L) { // this is the A strip
-      int led = i + ((index-1) * 170);
-      Serial.printf("A-STRIP led%i/%i %u/%u-%i %u %u %i %i\n", led, NUM_LEDS_A, universe, maxUniverses, START_UNIVERSE_A, length, sequence, index, sendFrame);
+    } else if (thisUniverse >= START_UNIVERSE_A && thisUniverse < START_UNIVERSE_L) { // this is the A strip 3+4
+      int led = i + ((thisUniverse-START_UNIVERSE_A) * 170);  // for thisUniverse==3 ? led start at 0 : led start at 170
+      //Serial.printf("%i: A-STRIP from %i to %i \tthisUniverse%i led%i/%i %u/%u %u\n", i, START_UNIVERSE_A, START_UNIVERSE_L-1, thisUniverse, led, NUM_LEDS_A, length);
       if (led < NUM_LEDS_A)
       {
           leds_A[led] = getColors(i, data);
-          Serial.printf("ledNo %i | index %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+          //Serial.printf("leds_A ledNo %i | thisUniverse %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
       }
-    } else if (index >= START_UNIVERSE_L) { // this is the L strip
-      int led = i + ((index-1) * 170);
-      Serial.printf("L-STRIP led%i/%i %u/%u-%i %u %u %i %i\n", led, NUM_LEDS_L, universe, maxUniverses, START_UNIVERSE_L, length, sequence, index, sendFrame);
+    } else if (thisUniverse >= START_UNIVERSE_L) { // this is the L strip 5
+      int led = i + ((thisUniverse-START_UNIVERSE_L) * 170);  // for thisUniverse==5 ? led start at 0 : <nothing else>
+      // Serial.printf("L-STRIP from %i to infinityyy! \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_L, led, NUM_LEDS_L, universe, maxUniverses, START_UNIVERSE_L, length, sequence, thisUniverse, sendFrame);
       if (led < NUM_LEDS_L)
       {
           leds_L[led] = getColors(i, data);
-          Serial.printf("ledNo %i | index %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+          //Serial.printf("leds_L ledNo %i | thisUniverse %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
       }
     }
   }
