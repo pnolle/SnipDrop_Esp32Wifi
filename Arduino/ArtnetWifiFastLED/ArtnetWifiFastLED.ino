@@ -10,19 +10,24 @@ This example may be copied under the terms of the MIT license, see the LICENSE f
 
 // Configure IP addresses of the local access point
 IPAddress local_IP(192, 168, 1, 22);
+IPAddress local_IP_client(192, 168, 1, 31);
+
 IPAddress gateway(192, 168, 1, 5);
 IPAddress subnet(255, 255, 255, 0);
+IPAddress primaryDNS(8, 8, 8, 8);   //optional
+IPAddress secondaryDNS(8, 8, 4, 4); //optional
 
 // LED settings
-// #define NUM_LEDS_C 507 // 507 leds_A in Circle
-// #define NUM_LEDS_A 452 // 452 leds_A in Arrow
-// #define NUM_LEDS_L 515 // 515 leds_A in Laser v2 + Scissors
-const int NUM_LEDS_C = 300;
-const int NUM_LEDS_A = 300;
-const int NUM_LEDS_L = 150;
+const int NUM_LEDS_C = 507; // 507 leds_A in Circle
+const int NUM_LEDS_A = 452; // 452 leds_A in Arrow
+const int NUM_LEDS_L = 515; // 515 leds_A in Laser v2 + Scissors
 
-const int START_UNIVERSE_A = 3;
-const int START_UNIVERSE_L = 5;
+//const int NUM_LEDS_C = 300;
+//const int NUM_LEDS_A = 300;
+//const int NUM_LEDS_L = 150;
+
+const int START_UNIVERSE_A = 4;
+const int START_UNIVERSE_L = 7;
 
 const int numberOfChannels = (NUM_LEDS_C + NUM_LEDS_A + NUM_LEDS_L) * 3; // Total number of receive channels (1 led = 3 channels)
 const byte dataPin_C = 12;
@@ -46,6 +51,11 @@ bool connectWifi()
 {
   bool state = true;
   int i = 0;
+
+  // Configures static IP address
+  if (!WiFi.config(local_IP_client, gateway, subnet, primaryDNS, secondaryDNS)) {
+    Serial.println("STA Failed to configure");
+  }
 
   WiFi.begin(ssid, password);
   Serial.println("");
@@ -102,6 +112,48 @@ bool startWifiAccessPoint()
   Serial.println(WiFi.softAPIP());
   return true;
 }
+
+
+void testIncr()
+{
+  for (int i = 0; i < 100; i++)
+  {
+    leds_L[i] = CRGB(127, 0, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < 200; i++)
+  {
+    leds_L[i] = CRGB(0, 127, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < 300; i++)
+  {
+    leds_L[i] = CRGB(0, 0, 127);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < 400; i++)
+  {
+    leds_L[i] = CRGB(0, 0, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < 500; i++)
+  {
+    leds_L[i] = CRGB(127, 0, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < NUM_LEDS_L; i++)
+  {
+    leds_L[i] = CRGB(0, 127, 0);
+  }
+  FastLED.show();
+  delay(500);
+}
+
 
 void initTest()
 {
@@ -197,14 +249,14 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
   //    }
   //  }
 
-  // Serial.printf("onDmxFrame %u/%u %u %u %i %i\n", universe, maxUniverses, length, sequence, thisUniverse, sendFrame);
+  Serial.printf("onDmxFrame %u/%u %u %u %i %i\n", universe, maxUniverses, length, sequence, thisUniverse, sendFrame);
 
   // read universe and put into the right part of the display buffer
   for (int i = 0; i < length / 3; i++)
   {
     // thisUniverse is the first relevant universe
     if (thisUniverse < START_UNIVERSE_A)
-    {                                           // this is the C strip 1+2
+    {                                           // this is the C strip 1-3
       int led = i + ((thisUniverse - 1) * 170); // for thisUniverse==1 ? led start at 0 : led start at 170
       // Serial.printf("C-STRIP from 0 to %i \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_A-1, led, NUM_LEDS_C, universe, maxUniverses, 0, length, sequence, thisUniverse, sendFrame);
       if (led < NUM_LEDS_C)
@@ -214,7 +266,7 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
       }
     }
     else if (thisUniverse >= START_UNIVERSE_A && thisUniverse < START_UNIVERSE_L)
-    {                                                          // this is the A strip 3+4
+    {                                                          // this is the A strip 4-6
       int led = i + ((thisUniverse - START_UNIVERSE_A) * 170); // for thisUniverse==3 ? led start at 0 : led start at 170
       // Serial.printf("%i: A-STRIP from %i to %i \tthisUniverse%i led%i/%i %u/%u %u\n", i, START_UNIVERSE_A, START_UNIVERSE_L-1, thisUniverse, led, NUM_LEDS_A, length);
       if (led < NUM_LEDS_A)
@@ -224,13 +276,13 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
       }
     }
     else if (thisUniverse >= START_UNIVERSE_L)
-    {                                                          // this is the L strip 5
+    {                                                          // this is the L strip 7-9
       int led = i + ((thisUniverse - START_UNIVERSE_L) * 170); // for thisUniverse==5 ? led start at 0 : <nothing else>
-      // Serial.printf("L-STRIP from %i to infinityyy! \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_L, led, NUM_LEDS_L, universe, maxUniverses, START_UNIVERSE_L, length, sequence, thisUniverse, sendFrame);
+      // if (led==509) Serial.printf("L-STRIP from %i to infinityyy! \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_L, led, NUM_LEDS_L, universe, maxUniverses, START_UNIVERSE_L, length, sequence, thisUniverse, sendFrame);
       if (led < NUM_LEDS_L)
       {
         leds_L[led] = getColors(i, data);
-        // Serial.printf("leds_L ledNo %i | thisUniverse %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+        // if (led==169) Serial.printf("leds_L ledNo %i | thisUniverse %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
       }
     }
   }
@@ -251,13 +303,14 @@ CRGB getColors(int i, uint8_t *data)
 void setup()
 {
   Serial.begin(115200);
-  // connectWifi();
-  startWifiAccessPoint();
+  connectWifi();
+  //startWifiAccessPoint();
   artnet.begin();
   FastLED.addLeds<WS2813, dataPin_C, GRB>(leds_C, NUM_LEDS_C);
   FastLED.addLeds<WS2813, dataPin_A, GRB>(leds_A, NUM_LEDS_A);
   FastLED.addLeds<WS2813, dataPin_L, GRB>(leds_L, NUM_LEDS_L);
   initTest();
+  //testIncr();
 
   // memset(universesReceived, 0, maxUniverses);
   // this will be called for each packet received
