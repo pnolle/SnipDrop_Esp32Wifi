@@ -1,12 +1,19 @@
 /*
-This example will receive multiple universes via Art-Net and control a strip of
-WS2812 leds_A via the FastLED library: https://github.com/FastLED/FastLED
-This example may be copied under the terms of the MIT license, see the LICENSE file for details
+Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
 */
 #include <ArtnetWifi.h>
 #include <Arduino.h>
 #include <FastLED.h>
 #include "secrets.h" // local variables
+
+// Code configuration
+/*
+Valid values:
+1 = Access Point (192.168.1.22) + Circle (C)
+2 = Client 1 (192.168.1.31) Arrow (A)
+3 = Client 2 (192.168.1.32) Laser + Scissors (L)
+*/
+const int config = 2;
 
 // Configure IP addresses of the local access point
 IPAddress local_IP_AP(192, 168, 1, 22);
@@ -33,9 +40,7 @@ const int START_UNIVERSE_L = 7;
 const int pixelFactor = 3; // number of pixels displaying the same information to save universes
 
 const int numberOfChannels = (NUM_LEDS_C + NUM_LEDS_A + NUM_LEDS_L) * 3 / pixelFactor; // Total number of receive channels (1 led = 3 channels)
-const byte dataPin_C = 12;
-const byte dataPin_A = 14;
-const byte dataPin_L = 27;
+const byte dataPin = 12;
 CRGB leds_C[NUM_LEDS_C];
 CRGB leds_A[NUM_LEDS_A];
 CRGB leds_L[NUM_LEDS_L];
@@ -271,7 +276,7 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
   //    }
   //  }
 
-  Serial.printf("onDmxFrame %u/%u %u %u %i %i\n", universe, maxUniverses, length, sequence, thisUniverse, sendFrame);
+  // Serial.printf("onDmxFrame %u/%u %u %u %i %i\n", universe, maxUniverses, length, sequence, thisUniverse, sendFrame);
 
   // read universe and put into the right part of the display buffer
   for (int i = 0; i < length / 3; i++)
@@ -286,7 +291,7 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
         if (led < NUM_LEDS_C)
         {
           leds_C[led] = getColors(i, data);
-          Serial.printf("ledNo %i | r %i | g %i | b %i\n", led, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+          // Serial.printf("ledNo %i | r %i | g %i | b %i\n", led, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
         }
         led++;
       }
@@ -337,12 +342,23 @@ CRGB getColors(int i, uint8_t *data)
 void setup()
 {
   Serial.begin(115200);
-  connectWifi(2);
-  // startWifiAccessPoint();
+
+  if (config == 1)
+  {
+    startWifiAccessPoint();
+    FastLED.addLeds<WS2813, dataPin, GRB>(leds_C, NUM_LEDS_C);
+  }
+  if (config == 2)
+  {
+    connectWifi(1);
+    FastLED.addLeds<WS2813, dataPin, GRB>(leds_A, NUM_LEDS_A);
+  }
+  if (config == 3)
+  {
+    connectWifi(2);
+    FastLED.addLeds<WS2813, dataPin, GRB>(leds_L, NUM_LEDS_L);
+  }
   artnet.begin();
-  FastLED.addLeds<WS2813, dataPin_C, GRB>(leds_C, NUM_LEDS_C);
-  FastLED.addLeds<WS2813, dataPin_A, GRB>(leds_A, NUM_LEDS_A);
-  FastLED.addLeds<WS2813, dataPin_L, GRB>(leds_L, NUM_LEDS_L);
   initTest();
   // testIncr();
 
