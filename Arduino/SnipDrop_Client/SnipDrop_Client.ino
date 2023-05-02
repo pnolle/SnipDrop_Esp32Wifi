@@ -50,8 +50,11 @@ String webpage = "<!DOCTYPE html><html><head><title>Client</title></head><body s
 int interval = 100;
 unsigned long previousMillis = 0;
 
-StaticJsonDocument<200> doc_tx;
-StaticJsonDocument<200> doc_rx;
+// Define variables to store BME280 readings to be sent
+uint16_t ledNum;
+uint8_t colR;
+uint8_t colG;
+uint8_t colB;
 
 
 void initTest()
@@ -85,8 +88,8 @@ void setup()
 {
   Serial.begin(115200);
 
-  WiFi.begin(ssid, password);
-  Serial.println("Establishing connection to WiFi with SSID: " + String(ssid));
+  // Set device as a Wi-Fi Station
+  WiFi.mode(WIFI_STA);
 
   // init LEDs
   FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds, NUM_LEDS);
@@ -98,10 +101,6 @@ void setup()
     delay(1000);
     Serial.print(".");
   }
-  Serial.print("Connected to network with IP address: ");
-  Serial.println(WiFi.localIP());
-  Serial.print("Client has MAC address: ");
-  Serial.println(WiFi.macAddress());
 
   // TODO: Clients should be able to send some kind of feedback. Figure out if it's better to use the webserver or websockets back to AP or the WebSerial lib (https://randomnerdtutorials.com/esp32-webserial-library/)
   server.on("/", []()
