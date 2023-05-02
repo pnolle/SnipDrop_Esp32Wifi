@@ -13,7 +13,7 @@ Valid values:
 2 = Client 1 (192.168.1.31) Arrow (A)
 3 = Client 2 (192.168.1.32) Laser + Scissors (L)
 */
-const int config = 2;
+const int config = 3;
 
 // Configure IP addresses of the local access point
 IPAddress local_IP_AP(192, 168, 1, 22);
@@ -278,12 +278,16 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
 
   // Serial.printf("onDmxFrame %u/%u %u %u %i %i\n", universe, maxUniverses, length, sequence, thisUniverse, sendFrame);
 
+  // special treatment for L strip
+  int leapLCounter = 0;
+  int leapLNow = 0;
+
   // read universe and put into the right part of the display buffer
   for (int i = 0; i < length / 3; i++)
   {
     // thisUniverse is the first relevant universe
-    if (thisUniverse < START_UNIVERSE_A)
-    {                                                         // this is the C strip 1-3
+    if (thisUniverse < START_UNIVERSE_A)  // this is the C strip on universe 1
+    {
       int led = i * pixelFactor + ((thisUniverse - 1) * 170); // for thisUniverse==1 ? led start at 0 : led start at 170
       // Serial.printf("C-STRIP from 0 to %i \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_A-1, led, NUM_LEDS_C, universe, maxUniverses, 0, length, sequence, thisUniverse, sendFrame);
       for (int p = 0; p < pixelFactor; p++)
@@ -296,8 +300,8 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
         led++;
       }
     }
-    else if (thisUniverse >= START_UNIVERSE_A && thisUniverse < START_UNIVERSE_L)
-    {                                                                        // this is the A strip 4-6
+    else if (thisUniverse >= START_UNIVERSE_A && thisUniverse < START_UNIVERSE_L)  // this is the A strip on universe 4
+    {
       int led = i * pixelFactor + ((thisUniverse - START_UNIVERSE_A) * 170); // for thisUniverse==3 ? led start at 0 : led start at 170
       // Serial.printf("%i: A-STRIP from %i to %i \tthisUniverse%i led%i/%i %u/%u %u\n", i, START_UNIVERSE_A, START_UNIVERSE_L-1, thisUniverse, led, NUM_LEDS_A, length);
       for (int p = 0; p < pixelFactor; p++)
@@ -310,19 +314,30 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
         led++;
       }
     }
-    else if (thisUniverse >= START_UNIVERSE_L)
-    {                                                                        // this is the L strip 7-9
-      int led = i * pixelFactor + ((thisUniverse - START_UNIVERSE_L) * 170); // for thisUniverse==5 ? led start at 0 : <nothing else>
+    else if (thisUniverse >= START_UNIVERSE_L)  // this is the L strip on universe 7
+    { 
+      // special treatment for the L strip because it's 5 longer than 3*170: add 1 extra LED every 34th time
+      int led = i * pixelFactor + ((thisUniverse - START_UNIVERSE_L) * 170) + leapLCounter; // for thisUniverse==5 ? led start at 0 : <nothing else>
       // if (led==509) Serial.printf("L-STRIP from %i to infinityyy! \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_L, led, NUM_LEDS_L, universe, maxUniverses, START_UNIVERSE_L, length, sequence, thisUniverse, sendFrame);
-      for (int p = 0; p < pixelFactor; p++)
+
+      int thisPixelFactor = pixelFactor;
+      if (leapLNow == 33) {
+        thisPixelFactor++;
+        leapLNow = 0;
+        leapLCounter++;
+      }
+      leapLNow++;
+      for (int p = 0; p < thisPixelFactor; p++)
       {
         if (led < NUM_LEDS_L)
         {
           leds_L[led] = getColors(i, data);
-          // if (led==169) Serial.printf("leds_L ledNo %i | thisUniverse %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+          // Serial.printf("leds_L ledNo %i | thisUniverse %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+          // Serial.printf("%i ", led);
         }
         led++;
       }
+      // Serial.println("");
     }
   }
 
