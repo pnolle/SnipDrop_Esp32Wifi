@@ -30,10 +30,6 @@ const int NUM_LEDS_C = 507; // 507 leds_A in Circle
 const int NUM_LEDS_A = 452; // 452 leds_A in Arrow
 const int NUM_LEDS_L = 515; // 515 leds_A in Laser v2 + Scissors
 
-// const int NUM_LEDS_C = 300;
-// const int NUM_LEDS_A = 300;
-// const int NUM_LEDS_L = 150;
-
 const int START_UNIVERSE_A = 4;
 const int START_UNIVERSE_L = 7;
 
@@ -53,7 +49,6 @@ const int startUniverse = 0; // CHANGE FOR YOUR SETUP most software this is 1, s
 
 // Check if we got all universes
 const int maxUniverses = numberOfChannels / 512 + ((numberOfChannels % 512) ? 1 : 0);
-// bool universesReceived[maxUniverses];
 bool sendFrame = true;
 
 // connect to wifi – returns true if successful or false if not
@@ -134,46 +129,6 @@ bool startWifiAccessPoint()
   Serial.print("IP address = ");
   Serial.println(WiFi.softAPIP());
   return true;
-}
-
-void testIncr()
-{
-  for (int i = 0; i < 100; i++)
-  {
-    leds_L[i] = CRGB(127, 0, 0);
-  }
-  FastLED.show();
-  delay(500);
-  for (int i = 0; i < 200; i++)
-  {
-    leds_L[i] = CRGB(0, 127, 0);
-  }
-  FastLED.show();
-  delay(500);
-  for (int i = 0; i < 300; i++)
-  {
-    leds_L[i] = CRGB(0, 0, 127);
-  }
-  FastLED.show();
-  delay(500);
-  for (int i = 0; i < 400; i++)
-  {
-    leds_L[i] = CRGB(0, 0, 0);
-  }
-  FastLED.show();
-  delay(500);
-  for (int i = 0; i < 500; i++)
-  {
-    leds_L[i] = CRGB(127, 0, 0);
-  }
-  FastLED.show();
-  delay(500);
-  for (int i = 0; i < NUM_LEDS_L; i++)
-  {
-    leds_L[i] = CRGB(0, 127, 0);
-  }
-  FastLED.show();
-  delay(500);
 }
 
 void initTest()
@@ -258,24 +213,6 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
   }
   uint8_t thisUniverse = universe - startUniverse;
 
-  // if (thisUniverse >= maxUniverses)
-  //  if (thisUniverse > maxUniverses)
-  //  {
-  //    return;
-  //  }
-
-  //  // Store which universe has got in
-  //  universesReceived[thisUniverse] = true;
-  //
-  //  for (int i = 0 ; i < maxUniverses ; i++)
-  //  {
-  //    if (!universesReceived[i])
-  //    {
-  //      sendFrame = 0;
-  //      break;
-  //    }
-  //  }
-
   // Serial.printf("onDmxFrame %u/%u %u %u %i %i\n", universe, maxUniverses, length, sequence, thisUniverse, sendFrame);
 
   // special treatment for L strip
@@ -344,8 +281,6 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
   if (sendFrame)
   {
     FastLED.show();
-    // Reset universeReceived to 0
-    // memset(universesReceived, 0, maxUniverses);
   }
 }
 
@@ -375,9 +310,7 @@ void setup()
   }
   artnet.begin();
   initTest();
-  // testIncr();
 
-  // memset(universesReceived, 0, maxUniverses);
   // this will be called for each packet received
   artnet.setArtDmxCallback(onDmxFrame);
 }
