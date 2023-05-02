@@ -1,9 +1,12 @@
 /*
 Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
 */
-#include <ArtnetWifi.h>
 #include <Arduino.h>
+#include <ArtnetWifi.h>
 #include <FastLED.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+#include <WebSerial.h>
 #include "secrets.h" // local variables
 
 // Code configuration
@@ -56,6 +59,9 @@ const int maxUniverses = numberOfChannels / 512 + ((numberOfChannels % 512) ? 1 
 // bool universesReceived[maxUniverses];
 bool sendFrame = true;
 
+// Web Serial
+AsyncWebServer server(80);
+
 // connect to wifi – returns true if successful or false if not
 bool connectWifi(int clientNo = 1)
 {
@@ -81,11 +87,12 @@ bool connectWifi(int clientNo = 1)
   }
 
   WiFi.begin(ssid, password);
-  Serial.println("");
   Serial.println("Connecting to WiFi");
+  WebSerial.println("Connecting to WiFi");
 
   // Wait for connection
   Serial.print("Connecting");
+  WebSerial.print("Connecting");
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
@@ -99,16 +106,20 @@ bool connectWifi(int clientNo = 1)
   }
   if (state)
   {
-    Serial.println("");
     Serial.print("Connected to ");
     Serial.println(ssid);
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
+    WebSerial.println("");
+    WebSerial.print("Connected to ");
+    WebSerial.println(ssid);
+    WebSerial.print("IP address: ");
+    WebSerial.println(WiFi.localIP());
   }
   else
   {
-    Serial.println("");
     Serial.println("Connection failed.");
+    WebSerial.println("Connection failed.");
     connectWifi(clientNo);
   }
 
@@ -119,8 +130,10 @@ bool startWifiAccessPoint()
 {
   Serial.print("Setting up Access Point ... ");
   Serial.println(WiFi.softAPConfig(local_IP_AP, gateway, subnet) ? "Ready" : "Failed!");
-
   Serial.print("Starting Access Point ... ");
+  WebSerial.print("Setting up Access Point ... ");
+  WebSerial.println(WiFi.softAPConfig(local_IP_AP, gateway, subnet) ? "Ready" : "Failed!");
+  WebSerial.print("Starting Access Point ... ");
   if (WiFi.softAP(ssid, password))
   {
     Serial.println("Ready");
@@ -131,8 +144,11 @@ bool startWifiAccessPoint()
     return false;
   }
 
+  const IPAddress apIpAddress = WiFi.softAPIP();
   Serial.print("IP address = ");
-  Serial.println(WiFi.softAPIP());
+  Serial.println(apIpAddress);
+  WebSerial.print("IP address = ");
+  WebSerial.println(apIpAddress);
   return true;
 }
 
@@ -354,9 +370,24 @@ CRGB getColors(int i, uint8_t *data)
   return CRGB(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
 }
 
+void onWebSerialMsg(uint8_t *data, size_t len){
+  WebSerial.println("Received Data...");
+  String d = "";
+  for(int i=0; i < len; i++){
+    d += char(data[i]);
+  }
+  WebSerial.println(d);
+}
+
 void setup()
 {
   Serial.begin(115200);
+
+  Serial.println("before WebSerial setup");
+  // WebSerial is accessible at "<IP Address>/webserial" in browser
+  WebSerial.begin(&server);
+  // WebSerial.msgCallback(onWebSerialMsg);
+  server.begin();
 
   if (config == 1)
   {
