@@ -13,7 +13,7 @@ Valid values:
 2 = Client 1 (192.168.1.31) Arrow (A)
 3 = Client 2 (192.168.1.32) Laser + Scissors (L)
 */
-const int config = 1;
+const int config = 2;
 
 // Configure IP addresses of the local access point
 IPAddress local_IP_AP(192, 168, 1, 22); // C strip
@@ -99,11 +99,13 @@ bool connectWifi(int clientNo = 1)
     Serial.println(ssid);
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
+    wifiConfirm();
   }
   else
   {
     Serial.println("");
     Serial.println("Connection failed.");
+    wifiFail();
     connectWifi(clientNo);
   }
 
@@ -119,16 +121,137 @@ bool startWifiAccessPoint()
   if (WiFi.softAP(ssid, password))
   {
     Serial.println("Ready");
+    wifiConfirm();
   }
   else
   {
     Serial.println("Failed!");
+    wifiFail();
     return false;
   }
 
   Serial.print("IP address = ");
   Serial.println(WiFi.softAPIP());
   return true;
+}
+
+void wifiConfirm()
+{
+  for (int i = 0; i < NUM_LEDS_C; i++)
+  {
+    leds_C[i] = CRGB(200, 200, 200);
+  }
+  for (int i = 0; i < NUM_LEDS_A; i++)
+  {
+    leds_A[i] = CRGB(200, 200, 200);
+  }
+  for (int i = 0; i < NUM_LEDS_L; i++)
+  {
+    leds_L[i] = CRGB(200, 200, 200);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < NUM_LEDS_C; i++)
+  {
+    leds_C[i] = CRGB(0, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_A; i++)
+  {
+    leds_A[i] = CRGB(0, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_L; i++)
+  {
+    leds_L[i] = CRGB(0, 0, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < NUM_LEDS_C; i++)
+  {
+    leds_C[i] = CRGB(200, 200, 200);
+  }
+  for (int i = 0; i < NUM_LEDS_A; i++)
+  {
+    leds_A[i] = CRGB(200, 200, 200);
+  }
+  for (int i = 0; i < NUM_LEDS_L; i++)
+  {
+    leds_L[i] = CRGB(200, 200, 200);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < NUM_LEDS_C; i++)
+  {
+    leds_C[i] = CRGB(0, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_A; i++)
+  {
+    leds_A[i] = CRGB(0, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_L; i++)
+  {
+    leds_L[i] = CRGB(0, 0, 0);
+  }
+  FastLED.show();
+  Serial.println("wifiConfirm");
+}
+
+void wifiFail()
+{
+  for (int i = 0; i < NUM_LEDS_C; i++)
+  {
+    leds_C[i] = CRGB(100, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_A; i++)
+  {
+    leds_A[i] = CRGB(100, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_L; i++)
+  {
+    leds_L[i] = CRGB(100, 0, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < NUM_LEDS_C; i++)
+  {
+    leds_C[i] = CRGB(0, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_A; i++)
+  {
+    leds_A[i] = CRGB(0, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_L; i++)
+  {
+    leds_L[i] = CRGB(0, 0, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < NUM_LEDS_C; i++)
+  {
+    leds_C[i] = CRGB(100, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_A; i++)
+  {
+    leds_A[i] = CRGB(100, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_L; i++)
+  {
+    leds_L[i] = CRGB(100, 0, 0);
+  }
+  FastLED.show();
+  delay(500);
+  for (int i = 0; i < NUM_LEDS_C; i++)
+  {
+    leds_C[i] = CRGB(0, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_A; i++)
+  {
+    leds_A[i] = CRGB(0, 0, 0);
+  }
+  for (int i = 0; i < NUM_LEDS_L; i++)
+  {
+    leds_L[i] = CRGB(0, 0, 0);
+  }
+  FastLED.show();
 }
 
 void initTest()
@@ -297,19 +420,22 @@ void setup()
   {
     startWifiAccessPoint();
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_C, NUM_LEDS_C);
+    FastLED.setBrightness(255);
   }
   if (config == 2)
   {
     connectWifi(1);
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_A, NUM_LEDS_A);
+    FastLED.setBrightness(255);
   }
   if (config == 3)
   {
     connectWifi(2);
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_L, NUM_LEDS_L);
+    FastLED.setBrightness(200);
   }
   artnet.begin();
-  initTest();
+  //initTest();
 
   // this will be called for each packet received
   artnet.setArtDmxCallback(onDmxFrame);
