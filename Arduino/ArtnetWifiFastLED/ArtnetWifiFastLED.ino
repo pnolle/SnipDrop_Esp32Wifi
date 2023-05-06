@@ -13,12 +13,12 @@ Valid values:
 2 = Client 1 (192.168.1.31) Arrow (A)
 3 = Client 2 (192.168.1.32) Laser + Scissors (L)
 */
-const int config = 3;
+const int config = 1;
 
 // Configure IP addresses of the local access point
-IPAddress local_IP_AP(192, 168, 1, 22);
-IPAddress local_IP_C1(192, 168, 1, 31);
-IPAddress local_IP_C2(192, 168, 1, 32);
+IPAddress local_IP_AP(192, 168, 1, 22); // C strip
+IPAddress local_IP_C1(192, 168, 1, 31); // A strip
+IPAddress local_IP_C2(192, 168, 1, 32); // L strip
 
 IPAddress gateway(192, 168, 1, 5);
 IPAddress subnet(255, 255, 255, 0);
