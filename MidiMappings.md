@@ -130,36 +130,36 @@
 | 126 | Omni mode on | 125 | _ | _ |
 | 127 | Poly mode on/off | 126 | _ | _ |
 | 128 | Poly mode on | 127 | _ | _ |
-| 129 | C-1 |  C-2 | _ | _ |
-| 130 | C#-1 | C#-2 | _ | _ |
-| 131 | D-1 |  D-2 | _ | _ |
-| 132 | D#-1 | D#-2 | _ | _ |
-| 133 | E-1 |  E-2 | _ | _ |
-| 134 | F-1 |  F-2 | _ | _ |
-| 135 | F#-1 | F#-2 | _ | _ |
-| 136 | G-1 |  G-2 | _ | _ |
-| 137 | G#-1 | G#-2 | _ | _ |
-| 138 | A-1 |  A-2 | _ | _ |
-| 139 | A#-1 | A#-2 | _ | _ |
-| 140 | B-1 |  B-2 | _ | _ |
-| 141 | C0 | C-1 | _ | _ |
-| 142 | C#0 | C#-1 | _ | _ |
-| 143 | D0 | D-1 | _ | _ |
-| 144 | D#0 | D#-1 | _ | _ |
-| 145 | E0 | E-1 | _ | _ |
-| 146 | F0 | F-1 | _ | _ |
-| 147 | F#0 | F#-1 | _ | _ |
-| 148 | G0 | G-1 | _ | _ |
+| 129 | C-1 |  C-2 | all RGBW | all RGBW |
+| 130 | C#-1 | C#-2 | all RGBW | all RGBW |
+| 131 | D-1 |  D-2 | all RGBW | all RGBW |
+| 132 | D#-1 | D#-2 | all RGBW | all RGBW |
+| 133 | E-1 |  E-2 | T01 RGBW | C RGBW |
+| 134 | F-1 |  F-2 | T01 RGBW | C RGBW |
+| 135 | F#-1 | F#-2 | T01 RGBW | C RGBW |
+| 136 | G-1 |  G-2 | T01 RGBW | C RGBW |
+| 137 | G#-1 | G#-2 | T02 RGBW | A RGBW |
+| 138 | A-1 |  A-2 | T02 RGBW | A RGBW |
+| 139 | A#-1 | A#-2 | T02 RGBW | A RGBW |
+| 140 | B-1 |  B-2 | T02 RGBW | A RGBW |
+| 141 | C0 | C-1 | T03 RGBW | L RGBW |
+| 142 | C#0 | C#-1 | T03 RGBW | L RGBW |
+| 143 | D0 | D-1 | T03 RGBW | L RGBW |
+| 144 | D#0 | D#-1 | T03 RGBW | L RGBW |
+| 145 | E0 | E-1 | T04 RGBW | _ |
+| 146 | F0 | F-1 | T04 RGBW | _ |
+| 147 | F#0 | F#-1 | T04 RGBW | _ |
+| 148 | G0 | G-1 | T04 RGBW | _ |
 | 149 | G#0 | G#-1 | _ | _ |
 | 150 | A0 | A-1 | _ | _ |
 | 151 | A#0 | A#-1 | _ | _ |
 | 152 | B0 | B-1 | _ | _ |
-| 153 | C1 | C0 | _ | _ |
-| 154 | C#1 | C#0 | _ | _ |
-| 155 | D1 | D0 | _ | _ |
-| 156 | D#1 | D#0 | _ | _ |
-| 157 | E1 | E0 | _ | _ |
-| 158 | F1 | F0 | _ | _ |
+| 153 | C1 | C0 | Flash R | Flash R |
+| 154 | C#1 | C#0 | Flash G | Flash G |
+| 155 | D1 | D0 | Flash B | Flash B |
+| 156 | D#1 | D#0 | Flash W | Flash W |
+| 157 | E1 | E0 | Flash Teal | Flash Teal |
+| 158 | F1 | F0 | Flash Orange | Flash Orange |
 | 159 | F#1 | F#0 | _ | _ |
 | 160 | G1 | G0 | _ | _ |
 | 161 | G#1 | G#0 | _ | _ |
@@ -175,52 +175,51 @@
 | 171 | F#2 | F#1 | _ | _ |
 | 172 | G2 | G1 | _ | _ |
 | 173 | G#2 | G#1 | _ | _ |
-| 174 | A2 | A1 | _ | _ |
-| 175 | A#2 | A#1 | _ | _ |
+| 174 | A2 | A1 | _ | C Fill up from center neutral |
+| 175 | A#2 | A#1 | SA - 03 | _ |
 | 176 | B2 | B1 | _ | _ |
-| 177 | C3 | C2 | _ | _ |
-| 178 | C#3 | C#2 | _ | _ |
-| 179 | D3 | D2 | _ | _ |
-| 180 | D#3 | D#2 | _ | _ |
-| 180 | D#3 |  D#2 | _ | _ |
-| 181 | E3 |  E2 | _ | _ |
-| 182 | F3 |  F2 | _ | _ |
-| 183 | F#3 |  F#2 | _ | _ |
-| 184 | G3 |  G2 | _ | _ |
-| 185 | G#3 |  G#2 | _ | _ |
-| 186 | A3 |  A2 | _ | _ |
-| 187 | A#3 |  A#2 | _ | _ |
-| 188 | B3 |  B2 | _ | _ |
-| 189 | C4 |  C3 | _ | _ |
-| 190 | C#4 |  C#3 | _ | _ |
-| 191 | D4 |  D3 | _ | _ |
-| 192 |D#4 | D#3 | _ | _ |
-| 193 | E4 |  E3 | _ | _ |
-| 194 | F4 |  F3 | _ | _ |
-| 195 |F#4 | F#3 | _ | _ |
-| 196 | G4 |  G3 | _ | _ |
+| 177 | C3 | C2 | _ | A Circular violet |
+| 178 | C#3 | C#2 | _ | C Circular violet |
+| 179 | D3 | D2 | _ | L Circular violet |
+| 180 | D#3 | D#2 | _ | A Fill up from center red |
+| 181 | E3 |  E2 | _ | C Fill up from center red |
+| 182 | F3 |  F2 | _ | L Fill up from center red |
+| 183 | F#3 |  F#2 | _ | A One red |
+| 184 | G3 |  G2 | _ | C One red |
+| 185 | G#3 |  G#2 | _ | L One red |
+| 186 | A3 |  A2 | _ | C One medium |
+| 187 | A#3 |  A#2 | _ | C One slow |
+| 188 | B3 |  B2 | _ | A Squares turq |
+| 189 | C4 |  C3 | _ | C Squares turq |
+| 190 | C#4 |  C#3 | _ | L Squares turq |
+| 191 | D4 |  D3 | _ | A Rnd fill orange |
+| 192 |D#4 | D#3 | _ | C Rnd fill red |
+| 193 | E4 |  E3 | _ | L Rnd fill red |
+| 194 | F4 |  F3 | _ | A Rnd fill turq |
+| 195 |F#4 | F#3 | _ | C Rnd fill red |
+| 196 | G4 |  G3 | _ | L Rnd fill turq |
 | 197 | G#4 |  G#3 | _ | _ |
 | 198 | A4 |  A3 | _ | _ |
 | 199 |A#4 | A#3 | _ | _ |
-| 200 | B4 |  B3 | _ | _ |
-| 201 | C5 |  C4 | _ | _ |
-| 202 | C#5 |  C#4 | _ | _ |
+| 200 | B4 |  B3 | SA Flash Teal | SA Flash Teal |
+| 201 | C5 |  C4 | SA Flash Orange | SA Flash Orange |
+| 202 | C#5 |  C#4 | SA Flash Orange Fast | SA Flash Orange Fast |
 | 203 | D5 |  D4 | _ | _ |
-| 204 | D#5 |  D#4 | _ | _ |
+| 204 | D#5 |  D#4 | SA Flash Red Fast | SA Flash Red Fast |
 | 205 | E5 |  E4 | _ | _ |
 | 206 | F5 |  F4 | _ | _ |
 | 207 | F#5 |  F#4 | _ | _ |
 | 208 | G5 |  G4 | _ | _ |
 | 209 | G#5 |  G#4 | _ | _ |
-| 210 | A5 |  A4 | _ | _ |
-| 211 |A#5 | A#4 | _ | _ |
-| 212 | B5 |  B4 | _ | _ |
-| 213 | C6 |  C5 | _ | _ |
-| 214 | C#6 |  C#5 | _ | _ |
-| 215 | D6 |  D5 | _ | _ |
-| 216 | D#6 |  D#5 | _ | _ |
-| 217 | E6 |  E5 | _ | _ |
-| 218 | F6 |  F5 | _ | _ |
+| 210 | A5 |  A4 | _ | A Strobe orange |
+| 211 |A#5 | A#4 | _ | C Strobe red |
+| 212 | B5 |  B4 | _ | L Strobe orange |
+| 213 | C6 |  C5 | _ | A Strobe turq |
+| 214 | C#6 |  C#5 | _ | C Strobe turq |
+| 215 | D6 |  D5 | _ | L Strobe turq |
+| 216 | D#6 |  D#5 | _ | A Strobe white |
+| 217 | E6 |  E5 | _ | C Strobe white |
+| 218 | F6 |  F5 | _ | L Strobe white |
 | 219 | F#6 |  F#5 | _ | _ |
 | 220 | G6 |  G5 | _ | _ |
 | 221 | G#6 |  G#5 | _ | _ |
@@ -232,18 +231,18 @@
 | 227 | D7 |  D6 | _ | _ |
 | 228 |D#7 | D#6 | _ | _ |
 | 229 | E7 |  E6 | _ | _ |
-| 230 | F7 |  F6 | _ | _ |
-| 231 | F#7 |  F#6 | _ | _ |
+| 230 | F7 |  F6 | _ | Gradient Abstract |
+| 231 | F#7 |  F#6 | _ | Gradient Abstract |
 | 232 | G7 |  G6 | _ | _ |
-| 233 | G#7 |  G#6 | _ | _ |
-| 234 | A7 |  A6 | _ | _ |
+| 233 | G#7 |  G#6 | _ | Gradient Ocean |
+| 234 | A7 |  A6 | _ | Gradient Ocean |
 | 235 | A#7 |  A#6 | _ | _ |
-| 236 | B7 |  B6 | _ | _ |
-| 237 | C8 |  C7 | _ | _ |
-| 238 | C#8 |  C#7 | _ | _ |
-| 239 | D8 |  D7 | _ | _ |
-| 240 | D#8 |  D#7 | _ | _ |
-| 241 | E8 |  E7 | _ | _ |
+| 236 | B7 |  B6 | _ | Gradient Sunset |
+| 237 | C8 |  C7 | _ | Gradient Sunset|
+| 238 | C#8 |  C#7 | _ | Gradient Sunset|
+| 239 | D8 |  D7 | _ | C Sparkle fast neutral |
+| 240 | D#8 |  D#7 | _ | C Sparkle slow neutral |
+| 241 | E8 |  E7 | _ | C Sparkle fast blue |
 | 242 | F8 |  F7 | _ | _ |
 | 243 | F#8 |  F#7 | _ | _ |
 | 244 | G8 |  G7 | _ | _ |
