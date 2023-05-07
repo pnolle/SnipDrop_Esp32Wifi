@@ -297,16 +297,19 @@ void setup()
   {
     startWifiAccessPoint();
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_C, NUM_LEDS_C);
+    FastLED.setBrightness(255);
   }
   if (config == 2)
   {
     connectWifi(1);
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_A, NUM_LEDS_A);
+    FastLED.setBrightness(255);
   }
   if (config == 3)
   {
     connectWifi(2);
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_L, NUM_LEDS_L);
+    FastLED.setBrightness(200);
   }
   artnet.begin();
   initTest();
