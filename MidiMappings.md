@@ -1,17 +1,17 @@
 # MIDI Mappings
 
-| No | Cmd / Note | Ableton | Asteras | SnipDrop |
+| Qlc | Cmd / Note | Ableton | Asteras | SnipDrop |
 | - | - | - | - | - |
 | 1 | Bank select MSB | 0 (blocked) | _ | _ |
-| 2 | Modulation wheel MSB | 1 | all green | _ |
-| 3 | Breath control MSB | 2 | all blue | _ |
-| 4 | Undefined MSB | 3 | all white | _ |
-| 5 | Foot controller MSB | 4 | T01 r | C r |
-| 6 | Portamento MSB | 5 | T01 g| C g |
-| 7 | Data entry MSB | 6 | T01 b | C b |
-| 8 | Channel volume MSB | 7 | T01 w | C w |
-| 9 | Balance MSB | 8 | all red | _ |
-| 10 | Undefined MSB | 9 | _ | _ |
+| 2 | Modulation wheel MSB | 1 | Envelope all green | Envelope all green |
+| 3 | Breath control MSB | 2 | Envelope all blue | Envelope all blue |
+| 4 | Undefined MSB | 3 | Envelope all white | Envelope all white |
+| 5 | Foot controller MSB | 4 | Envelope T01 r | C r |
+| 6 | Portamento MSB | 5 | Envelope T01 g| C g |
+| 7 | Data entry MSB | 6 | Envelope T01 b | C b |
+| 8 | Channel volume MSB | 7 (blocked!?) | Envelope T01 w (?) | _ |
+| 9 | Balance MSB | 8 | Envelope all red | Envelope all red |
+| 10 | Undefined MSB | 9 | Envelope T01 w | C w |
 | 11 | Pan MSB | 10 | _ | _ |
 | 12 | Expression controller MSB | 11 | _ | _ |
 | 13 | Effect 1 MSB | 12 | _ | _ |
@@ -38,11 +38,11 @@
 | 34 | Modulation wheel LSB | 33 | _ | _ |
 | 35 | Breath control LSB | 34 | _ | _ |
 | 36 | Undefined LSB | 35 | _ | _ |
-| 37 | Foot controller LSB | 36 | T02 r | A r |
-| 38 | Portamento LSB | 37 | T02 g | A g |
-| 39 | Data entry LSB | 38 | T02 b | A b |
-| 40 | Channel volume LSB | 39 | T02 w | A w |
-| 41 | Balance LSB | 40 | _ | _ |
+| 37 | Foot controller LSB | 36 | Envelope T02 r | A r |
+| 38 | Portamento LSB | 37 | Envelope T02 g | A g |
+| 39 | Data entry LSB | 38 (blocked?) | Envelope T02 b (?) | _ |
+| 40 | Channel volume LSB | 39 | Envelope T02 w | A w |
+| 41 | Balance LSB | 40 | Envelope T02 b | A b |
 | 42 | Undefined LSB | 41 | _ | _ |
 | 43 | Pan LSB | 42 | _ | _ |
 | 44 | Expression controller LSB | 43 | _ | _ |
@@ -66,10 +66,10 @@
 | 62 | Undefined LSB | 61 | _ | _ |
 | 63 | Undefined LSB | 62 | _ | _ |
 | 64 | Undefined LSB | 63 | _ | _ |
-| 65 | Sustain pedal | 64 | T03 r | L r |
-| 66 | Portamento control | 65 | T03 g| L g |
-| 67 | Sostenuto pedal | 66 | T03 b | L b |
-| 68 | Soft pedal | 67 | T03 w | L w |
+| 65 | Sustain pedal | 64 | Envelope T03 r | L r |
+| 66 | Portamento control | 65 | Envelope T03 g| L g |
+| 67 | Sostenuto pedal | 66 | Envelope T03 b | L b |
+| 68 | Soft pedal | 67 | Envelope T03 w | L w |
 | 69 | Legato pedal | 68 | _ | _ |
 | 70 | Hold 2 | 69 | _ | _ |
 | 71 | Sound control 1 (Sound variation) LSB | 70 | _ | _ |
@@ -98,10 +98,10 @@
 | 94 | Effects 3 (Chorus) Depth LSB | 93 | _ | _ |
 | 95 | Effects 4 (Detune) Depth LSB | 94 | _ | _ |
 | 96 | Effects 5 (Phaser) Depth LSB | 95 | _ | _ |
-| 97 | Data entry +1 | 96 | T04 r | _ |
-| 98 | Data entry - 1 | 97 | T04 g | _ |
-| 99 | NRPN LSB | 98 | T04 b | _ |
-| 100 | NRPN MSB | 99 | T04 w | _ |
+| 97 | Data entry +1 | 96 | Envelope T04 r | _ |
+| 98 | Data entry - 1 | 97 | Envelope T04 g | _ |
+| 99 | NRPN LSB | 98 | Envelope T04 b | _ |
+| 100 | NRPN MSB | 99 | Envelope T04 w | _ |
 | 101 | RPN LSB | 100 | _ | _ |
 | 102 | RPN MSB | 101 | _ | _ |
 | 103 | Undefined | 102 | _ | _ |
@@ -142,10 +142,10 @@
 | 138 | A-1 |  A-2 | T02 RGBW | A RGBW |
 | 139 | A#-1 | A#-2 | T02 RGBW | A RGBW |
 | 140 | B-1 |  B-2 | T02 RGBW | A RGBW |
-| 141 | C0 | C-1 | T03 RGBW | L RGBW |
-| 142 | C#0 | C#-1 | T03 RGBW | L RGBW |
-| 143 | D0 | D-1 | T03 RGBW | L RGBW |
-| 144 | D#0 | D#-1 | T03 RGBW | L RGBW |
+| 141 | C0 | C-1 | T03 RGBW | L R |
+| 142 | C#0 | C#-1 | T03 RGBW | L G |
+| 143 | D0 | D-1 | T03 RGBW | L B |
+| 144 | D#0 | D#-1 | T03 RGBW | L W |
 | 145 | E0 | E-1 | T04 RGBW | _ |
 | 146 | F0 | F-1 | T04 RGBW | _ |
 | 147 | F#0 | F#-1 | T04 RGBW | _ |
@@ -172,11 +172,11 @@
 | 168 | D#2 | D#1 | _ | _ |
 | 169 | E2 | E1 | _ | _ |
 | 170 | F2 | F1 | _ | _ |
-| 171 | F#2 | F#1 | _ | _ |
-| 172 | G2 | G1 | _ | _ |
+| 171 | F#2 | F#1 | _ | C One neutral slow |
+| 172 | G2 | G1 | _ | C One neutral slow backwards |
 | 173 | G#2 | G#1 | _ | _ |
 | 174 | A2 | A1 | _ | C Fill up from center neutral |
-| 175 | A#2 | A#1 | SA - 03 | _ |
+| 175 | A#2 | A#1 | SA - 03 | C Fill up from center neutral slow |
 | 176 | B2 | B1 | _ | _ |
 | 177 | C3 | C2 | _ | A Circular violet |
 | 178 | C#3 | C#2 | _ | C Circular violet |
@@ -187,8 +187,8 @@
 | 183 | F#3 |  F#2 | _ | A One red |
 | 184 | G3 |  G2 | _ | C One red |
 | 185 | G#3 |  G#2 | _ | L One red |
-| 186 | A3 |  A2 | _ | C One medium |
-| 187 | A#3 |  A#2 | _ | C One slow |
+| 186 | A3 |  A2 | _ | C One red medium |
+| 187 | A#3 |  A#2 | _ | C One red slow |
 | 188 | B3 |  B2 | _ | A Squares turq |
 | 189 | C4 |  C3 | _ | C Squares turq |
 | 190 | C#4 |  C#3 | _ | L Squares turq |

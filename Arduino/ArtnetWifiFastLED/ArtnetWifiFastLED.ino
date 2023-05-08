@@ -13,7 +13,7 @@ Valid values:
 2 = Client 1 (192.168.1.31) Arrow (A)
 3 = Client 2 (192.168.1.32) Laser + Scissors (L)
 */
-const int config = 1;
+const int config = 3;
 
 // Configure IP addresses of the local access point
 IPAddress local_IP_AP(192, 168, 1, 22); // C strip
@@ -309,7 +309,7 @@ void setup()
   {
     connectWifi(2);
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_L, NUM_LEDS_L);
-    FastLED.setBrightness(200);
+    FastLED.setBrightness(190);
   }
   artnet.begin();
   initTest();
