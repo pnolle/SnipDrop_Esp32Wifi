@@ -9,9 +9,9 @@
 | 5 | Foot controller MSB | 4 | Envelope T01 r | C r |
 | 6 | Portamento MSB | 5 | Envelope T01 g| C g |
 | 7 | Data entry MSB | 6 | Envelope T01 b | C b |
-| 8 | Channel volume MSB | 7 (blocked!?) | Envelope T01 w (?) | _ |
+| 8 | Channel volume MSB | 7 | Envelope T01 w | C w |
 | 9 | Balance MSB | 8 | Envelope all red | Envelope all red |
-| 10 | Undefined MSB | 9 | Envelope T01 w | C w |
+| 10 | Undefined MSB | 9 |  _ | _ |
 | 11 | Pan MSB | 10 | _ | _ |
 | 12 | Expression controller MSB | 11 | _ | _ |
 | 13 | Effect 1 MSB | 12 | _ | _ |
@@ -130,26 +130,26 @@
 | 126 | Omni mode on | 125 | _ | _ |
 | 127 | Poly mode on/off | 126 | _ | _ |
 | 128 | Poly mode on | 127 | _ | _ |
-| 129 | C-1 |  C-2 | all RGBW | all RGBW |
-| 130 | C#-1 | C#-2 | all RGBW | all RGBW |
-| 131 | D-1 |  D-2 | all RGBW | all RGBW |
-| 132 | D#-1 | D#-2 | all RGBW | all RGBW |
-| 133 | E-1 |  E-2 | T01 RGBW | C RGBW |
-| 134 | F-1 |  F-2 | T01 RGBW | C RGBW |
-| 135 | F#-1 | F#-2 | T01 RGBW | C RGBW |
-| 136 | G-1 |  G-2 | T01 RGBW | C RGBW |
-| 137 | G#-1 | G#-2 | T02 RGBW | A RGBW |
-| 138 | A-1 |  A-2 | T02 RGBW | A RGBW |
-| 139 | A#-1 | A#-2 | T02 RGBW | A RGBW |
-| 140 | B-1 |  B-2 | T02 RGBW | A RGBW |
-| 141 | C0 | C-1 | T03 RGBW | L R |
-| 142 | C#0 | C#-1 | T03 RGBW | L G |
-| 143 | D0 | D-1 | T03 RGBW | L B |
-| 144 | D#0 | D#-1 | T03 RGBW | L W |
-| 145 | E0 | E-1 | T04 RGBW | _ |
-| 146 | F0 | F-1 | T04 RGBW | _ |
-| 147 | F#0 | F#-1 | T04 RGBW | _ |
-| 148 | G0 | G-1 | T04 RGBW | _ |
+| 129 | C-1 |  C-2 | all R | all R |
+| 130 | C#-1 | C#-2 | all G | all G |
+| 131 | D-1 |  D-2 | all B | all B |
+| 132 | D#-1 | D#-2 | all W | all W |
+| 133 | E-1 |  E-2 | T01 R | C R |
+| 134 | F-1 |  F-2 | T01 G | C G |
+| 135 | F#-1 | F#-2 | T01 B | C B |
+| 136 | G-1 |  G-2 | T01 W | C W |
+| 137 | G#-1 | G#-2 | T02 R | A R |
+| 138 | A-1 |  A-2 | T02 G | A G |
+| 139 | A#-1 | A#-2 | T02 B | A B |
+| 140 | B-1 |  B-2 | T02 W | A W |
+| 141 | C0 | C-1 | T03 R | L R |
+| 142 | C#0 | C#-1 | T03 G | L G |
+| 143 | D0 | D-1 | T03 B | L B |
+| 144 | D#0 | D#-1 | T03 W | L W |
+| 145 | E0 | E-1 | T04 R | _ |
+| 146 | F0 | F-1 | T04 G | _ |
+| 147 | F#0 | F#-1 | T04 B | _ |
+| 148 | G0 | G-1 | T04 W | _ |
 | 149 | G#0 | G#-1 | _ | _ |
 | 150 | A0 | A-1 | _ | _ |
 | 151 | A#0 | A#-1 | _ | _ |
@@ -160,18 +160,18 @@
 | 156 | D#1 | D#0 | Flash W | Flash W |
 | 157 | E1 | E0 | Flash Teal | Flash Teal |
 | 158 | F1 | F0 | Flash Orange | Flash Orange |
-| 159 | F#1 | F#0 | _ | _ |
-| 160 | G1 | G0 | _ | _ |
-| 161 | G#1 | G#0 | _ | _ |
-| 162 | A1 | A0 | _ | _ |
-| 163 | A#1 | A#0 | _ | _ |
-| 164 | B1 | B0 | _ | _ |
-| 165 | C2 | C1 | _ | _ |
-| 166 | C#2 | C#1 | _ | _ |
-| 167 | D2 | D1 | _ | _ |
-| 168 | D#2 | D#1 | _ | _ |
-| 169 | E2 | E1 | _ | _ |
-| 170 | F2 | F1 | _ | _ |
+| 159 | F#1 | F#0 | _ | A She Moved Here Wheep |
+| 160 | G1 | G0 | _ | C She Moved Here Wheep |
+| 161 | G#1 | G#0 | _ | L She Moved Here Wheep |
+| 162 | A1 | A0 | _ | A Water R Radar |
+| 163 | A#1 | A#0 | _ | C Water R Radar |
+| 164 | B1 | B0 | _ | L Water R Radar |
+| 165 | C2 | C1 | _ | A Spiral Nebula |
+| 166 | C#2 | C#1 | _ | C Spiral Nebula |
+| 167 | D2 | D1 | _ | L Spiral Nebula |
+| 168 | D#2 | D#1 | _ | A 1st assignment |
+| 169 | E2 | E1 | _ | C 1st assignment |
+| 170 | F2 | F1 | _ | L 1st assignment |
 | 171 | F#2 | F#1 | _ | C One neutral slow |
 | 172 | G2 | G1 | _ | C One neutral slow backwards |
 | 173 | G#2 | G#1 | _ | _ |
