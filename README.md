@@ -8,7 +8,7 @@ http://snippetupperlaser.com
 * ESP32 #1 is Access Point, opens up Wi-Fi ``SnipDrop``
 * Laptop with Ableton and Qlc+ as well as the other two ESP32 are on the AP's Wi-Fi.
 * Qlc+ sends out Artnet to fixed IPs of all 3 ESPs.
-* ESPs use FastLED to [!get alight](https://i.ytimg.com/vi/rTCefc-uuEw/maxresdefault.jpg).
+* ESPs use FastLED to [get alight](https://i.ytimg.com/vi/rTCefc-uuEw/maxresdefault.jpg).
 
 ```
 // Configure IP addresses of the local access point
