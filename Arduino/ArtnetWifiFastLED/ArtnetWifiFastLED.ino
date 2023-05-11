@@ -28,12 +28,13 @@ IPAddress secondaryDNS(8, 8, 4, 4); // optional
 // LED settings
 const int NUM_LEDS_C = 507; // 507 leds_A in Circle
 const int NUM_LEDS_A = 452; // 452 leds_A in Arrow
-const int NUM_LEDS_L = 515; // 515 leds_A in Laser v2 + Scissors
+const int NUM_LEDS_L = 646; // 646 leds_A in Laser v3 + Scissors
 
 const int START_UNIVERSE_A = 4;
 const int START_UNIVERSE_L = 7;
 
-const int pixelFactor = 3; // number of pixels displaying the same information to save universes
+const int pixelFactor = 4; // number of pixels displaying the same information to save universes
+// const int pixelFactor = 3; // number of pixels displaying the same information to save universes
 
 const int numberOfChannels = (NUM_LEDS_C + NUM_LEDS_A + NUM_LEDS_L) * 3 / pixelFactor; // Total number of receive channels (1 led = 3 channels)
 const byte dataPin = 12;
@@ -223,7 +224,7 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
   for (int i = 0; i < length / 3; i++)
   {
     // thisUniverse is the first relevant universe
-    if (thisUniverse < START_UNIVERSE_A)  // this is the C strip on universe 1
+    if (thisUniverse < START_UNIVERSE_A) // this is the C strip on universe 1
     {
       int led = i * pixelFactor + ((thisUniverse - 1) * 170); // for thisUniverse==1 ? led start at 0 : led start at 170
       // Serial.printf("C-STRIP from 0 to %i \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_A-1, led, NUM_LEDS_C, universe, maxUniverses, 0, length, sequence, thisUniverse, sendFrame);
@@ -237,7 +238,7 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
         led++;
       }
     }
-    else if (thisUniverse >= START_UNIVERSE_A && thisUniverse < START_UNIVERSE_L)  // this is the A strip on universe 4
+    else if (thisUniverse >= START_UNIVERSE_A && thisUniverse < START_UNIVERSE_L) // this is the A strip on universe 4
     {
       int led = i * pixelFactor + ((thisUniverse - START_UNIVERSE_A) * 170); // for thisUniverse==3 ? led start at 0 : led start at 170
       // Serial.printf("%i: A-STRIP from %i to %i \tthisUniverse%i led%i/%i %u/%u %u\n", i, START_UNIVERSE_A, START_UNIVERSE_L-1, thisUniverse, led, NUM_LEDS_A, length);
@@ -251,37 +252,100 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
         led++;
       }
     }
-    else if (thisUniverse >= START_UNIVERSE_L)  // this is the L strip on universe 7
-    { 
-      // special treatment for the L strip because it's 5 longer than 3*170: add 1 extra LED every 34th time
-      int led = i * pixelFactor + ((thisUniverse - START_UNIVERSE_L) * 170) + leapLCounter; // for thisUniverse==5 ? led start at 0 : <nothing else>
-      // if (led==509) Serial.printf("L-STRIP from %i to infinityyy! \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_L, led, NUM_LEDS_L, universe, maxUniverses, START_UNIVERSE_L, length, sequence, thisUniverse, sendFrame);
-
-      int thisPixelFactor = pixelFactor;
-      if (leapLNow == 33) {
-        thisPixelFactor++;
-        leapLNow = 0;
-        leapLCounter++;
-      }
-      leapLNow++;
-      for (int p = 0; p < thisPixelFactor; p++)
+    else if (thisUniverse >= START_UNIVERSE_L) // this is the L strip on universe 7
+    {
+      int led = i * pixelFactor + ((thisUniverse - START_UNIVERSE_L) * 170); // for thisUniverse==6 ? led start at 0 : <nothing else>
+      // Serial.printf("L-STRIP from %i to infinityyy! \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_L, led, NUM_LEDS_L, universe, maxUniverses, START_UNIVERSE_L, length, sequence, thisUniverse, sendFrame);
+      for (int p = 0; p < pixelFactor; p++)
       {
         if (led < NUM_LEDS_L)
         {
-          leds_L[led] = getColors(i, data);
-          // Serial.printf("leds_L ledNo %i | thisUniverse %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
-          // Serial.printf("%i ", led);
+          leds_L[addDeadSpace(led)] = getColors(i, data);
+          //Serial.printf("leds_L led %i => led incl. deadSpace %i | thisUniverse %i | r %i | g %i | b %i\n", led, addDeadSpace(led), thisUniverse, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
         }
         led++;
       }
-      // Serial.println("");
     }
+    // else if (thisUniverse >= START_UNIVERSE_L)  // this is the L strip on universe 7
+    // {
+    //   // special treatment for the L strip because it's 5 longer than 3*170: add 1 extra LED every 34th time
+    //   int led = i * pixelFactor + ((thisUniverse - START_UNIVERSE_L) * 170) + leapLCounter; // for thisUniverse==5 ? led start at 0 : <nothing else>
+    //   // if (led==509) Serial.printf("L-STRIP from %i to infinityyy! \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_L, led, NUM_LEDS_L, universe, maxUniverses, START_UNIVERSE_L, length, sequence, thisUniverse, sendFrame);
+
+    //   int thisPixelFactor = pixelFactor;
+    //   if (leapLNow == 33) {
+    //     thisPixelFactor++;
+    //     leapLNow = 0;
+    //     leapLCounter++;
+    //   }
+    //   leapLNow++;
+    //   for (int p = 0; p < thisPixelFactor; p++)
+    //   {
+    //     if (led < NUM_LEDS_L)
+    //     {
+    //       leds_L[led] = getColors(i, data);
+    //       // Serial.printf("leds_L ledNo %i | thisUniverse %i | r %i | g %i | b %i\n", led, i, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+    //       // Serial.printf("%i ", led);
+    //     }
+    //     led++;
+    //   }
+    //   // Serial.println("");
+    // }
   }
 
   if (sendFrame)
   {
     FastLED.show();
   }
+}
+
+int addDeadSpace(int led) {
+  int deadSpace = 0;
+  if (led > 19)
+  {
+    deadSpace = 5;
+  }
+  if (led > 45)
+  {
+    deadSpace += 6;
+  }
+  if (led > 65) //3
+  {
+    deadSpace += 5;
+  }
+  if (led > 91)
+  {
+    deadSpace += 6;
+  }
+  if (led > 111)
+  {
+    deadSpace += 5;
+  }
+  if (led > 138)  //6
+  {
+    deadSpace += 6;
+  }
+  if (led > 158)
+  {
+    deadSpace += 5;
+  }
+  if (led > 186)
+  {
+    deadSpace += 6;
+  }
+  if (led > 205)
+  {
+    deadSpace += 5;
+  }
+  if (led > 232)
+  {
+    deadSpace += 5;
+  }
+  if (led > 252)
+  {
+    deadSpace += 7;
+  }
+  return led + deadSpace;
 }
 
 CRGB getColors(int i, uint8_t *data)
