@@ -9,9 +9,10 @@ Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
 // Code configuration
 /*
 Valid values:
-1 = Access Point (192.168.1.22) + Circle (C)
+1 = Access Point (192.168.1.22)
 2 = Client 1 (192.168.1.31) Arrow (A)
 3 = Client 2 (192.168.1.32) Laser + Scissors (L)
+4 = Client 3 (192.168.1.33) Circle (C)
 */
 const int config = 1;
 
@@ -19,6 +20,7 @@ const int config = 1;
 IPAddress local_IP_AP(192, 168, 1, 22); // C strip
 IPAddress local_IP_C1(192, 168, 1, 31); // A strip
 IPAddress local_IP_C2(192, 168, 1, 32); // L strip
+IPAddress local_IP_C3(192, 168, 1, 33); // C strip
 
 IPAddress gateway(192, 168, 1, 5);
 IPAddress subnet(255, 255, 255, 0);
@@ -70,6 +72,13 @@ bool connectWifi(int clientNo = 1)
   if (clientNo == 2)
   {
     if (!WiFi.config(local_IP_C2, gateway, subnet, primaryDNS, secondaryDNS))
+    {
+      Serial.println("STA Failed to configure");
+    }
+  }
+  if (clientNo == 3)
+  {
+    if (!WiFi.config(local_IP_C3, gateway, subnet, primaryDNS, secondaryDNS))
     {
       Serial.println("STA Failed to configure");
     }
@@ -359,8 +368,6 @@ void setup()
   if (config == 1)
   {
     startWifiAccessPoint();
-    FastLED.addLeds<WS2813, dataPin, GRB>(leds_C, NUM_LEDS_C);
-    FastLED.setBrightness(255);
   }
   if (config == 2)
   {
@@ -372,7 +379,13 @@ void setup()
   {
     connectWifi(2);
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_L, NUM_LEDS_L);
-    FastLED.setBrightness(190);
+    FastLED.setBrightness(255);
+  }
+  if (config == 4)
+  {
+    connectWifi(3);
+    FastLED.addLeds<WS2813, dataPin, GRB>(leds_C, NUM_LEDS_C);
+    FastLED.setBrightness(255);
   }
   artnet.begin();
   initTest();
