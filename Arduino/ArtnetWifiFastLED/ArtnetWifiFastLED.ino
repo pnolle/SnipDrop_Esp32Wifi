@@ -251,20 +251,6 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
         led++;
       }
     }
-//     else if (thisUniverse >= START_UNIVERSE_L) // this is the L strip on universe 7
-//     {
-//       int led = i * pixelFactor + ((thisUniverse - START_UNIVERSE_L) * 170); // for thisUniverse==6 ? led start at 0 : <nothing else>
-//       //Serial.printf("L-STRIP from %i to infinityyy! \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_L, led, NUM_LEDS_L, universe, maxUniverses, START_UNIVERSE_L, length, sequence, thisUniverse, sendFrame);
-//       for (int p = 0; p < pixelFactor; p++)
-//       {
-//         if (led < NUM_LEDS_L)
-//         {
-//           leds_L[addDeadSpace(led)] = getColors(i, data);
-//           //Serial.printf("leds_L led %i => led incl. deadSpace %i | thisUniverse %i | r %i | g %i | b %i\n", led, addDeadSpace(led), thisUniverse, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
-//         }
-//         led++;
-//       }
-//     }
     else if (thisUniverse >= START_UNIVERSE_L)  // this is the L strip on universe 7
     {
       int led = i * pixelFactor + ((thisUniverse - START_UNIVERSE_L) * 170) + leapLCounter; // for thisUniverse==7 ? led start at 0 : <nothing else>
