@@ -13,7 +13,7 @@ Valid values:
 2 = Client 1 (192.168.1.31) Arrow (A)
 3 = Client 2 (192.168.1.32) Laser + Scissors (L)
 */
-const int config = 1;
+const int config = 3;
 
 // Configure IP addresses of the local access point
 IPAddress local_IP_AP(192, 168, 1, 22); // C strip
@@ -266,9 +266,10 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
       leapLNow++;
       for (int p = 0; p < thisPixelFactor; p++)
       {
-        if (led < NUM_LEDS_L)
+        int deadSpaceLed = addDeadSpace(led);
+        if (deadSpaceLed < NUM_LEDS_L)
         {
-          leds_L[addDeadSpace(led)] = getColors(i, data);
+          leds_L[deadSpaceLed] = getColors(i, data);
           // Serial.printf("leds_L led %i => led incl. deadSpace %i | thisUniverse %i | r %i | g %i | b %i\n", led, addDeadSpace(led), thisUniverse, data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
         }
         led++;
