@@ -28,7 +28,8 @@ IPAddress secondaryDNS(8, 8, 4, 4); // optional
 // LED settings
 const int NUM_LEDS_C = 507; // 507 leds_A in Circle
 const int NUM_LEDS_A = 452; // 452 leds_A in Arrow
-const int NUM_LEDS_L = 646; // 646 leds_A in Laser v3 + Scissors, 585 in use without deadSpace
+// const int NUM_LEDS_L = 646; // 646 leds_A in Laser v3 + Scissors, 585 in use without deadSpace
+const int NUM_LEDS_L = 639; // 646 leds_A in Laser v3 + Scissors, 585 in use without deadSpace
 
 const int START_UNIVERSE_A = 4;
 const int START_UNIVERSE_L = 7;
