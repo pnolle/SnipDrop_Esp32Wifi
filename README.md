@@ -22,3 +22,9 @@ Receive data from multiple boards: https://randomnerdtutorials.com/esp-now-many-
 
 ## Installation
 Copy secrets.h_template and rename to secrets.h, fill in SSID and Password for ESP32 Wi-Fi.
+
+## Libraries
+Developed and tested with
+* FastLED version 3.5.0
+* ArtnetWifi version 1.5.1
+
