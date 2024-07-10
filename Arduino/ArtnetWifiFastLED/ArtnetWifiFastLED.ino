@@ -134,6 +134,7 @@ bool startWifiAccessPoint()
 
 void initTest()
 {
+  Serial.printf("Init test %i\n", config);
   for (int i = 0; i < NUM_LEDS_C; i++)
   {
     leds_C[i] = CRGB(127, 0, 0);
@@ -343,27 +344,30 @@ CRGB getColors(int i, uint8_t *data)
 void setup()
 {
   Serial.begin(115200);
+  Serial.printf("MCU config is %i\n", config);
 
   if (config == 1)
   {
-    startWifiAccessPoint();
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_C, NUM_LEDS_C);
     FastLED.setBrightness(255);
+    initTest();
+    startWifiAccessPoint();
   }
   if (config == 2)
   {
-    connectWifi(1);
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_A, NUM_LEDS_A);
     FastLED.setBrightness(255);
+    initTest();
+    connectWifi(1);
   }
   if (config == 3)
   {
-    connectWifi(2);
     FastLED.addLeds<WS2813, dataPin, GRB>(leds_L, NUM_LEDS_L);
     FastLED.setBrightness(255);
+    initTest();
+    connectWifi(2);
   }
   artnet.begin();
-  initTest();
 
   // this will be called for each packet received
   artnet.setArtDmxCallback(onDmxFrame);
