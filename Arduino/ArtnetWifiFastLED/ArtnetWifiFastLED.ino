@@ -6,14 +6,28 @@ Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
 #include <FastLED.h>
 #include "secrets.h" // local variables
 
+// define enum for the different modes
+enum Mode {
+  MODE_CIRCLE,
+  MODE_ARROW,
+  MODE_LASERSCISSORS
+};
+
+// Define the pins
+#define GPIO_16 16
+#define GPIO_17 17
+#define GPIO_18 18
+#define GPIO_19 19
+#define DATA_PIN 12
+
 // Code configuration
 /*
-Valid values:
+Valid values defined in enum Mode:
 1 = Access Point (192.168.1.22) + Circle (C)
 2 = Client 1 (192.168.1.31) Arrow (A)
 3 = Client 2 (192.168.1.32) Laser + Scissors (L)
 */
-const int config = 3;
+Mode config = Mode::MODE_CIRCLE;
 
 // Configure IP addresses of the local access point
 IPAddress local_IP_AP(192, 168, 1, 22); // C strip
@@ -37,7 +51,6 @@ const int START_UNIVERSE_L = 7;
 const int pixelFactor = 3; // number of pixels displaying the same information to save universes
 
 const int numberOfChannels = (NUM_LEDS_C + NUM_LEDS_A + NUM_LEDS_L) * 3 / pixelFactor; // Total number of receive channels (1 led = 3 channels)
-const byte dataPin = 12;
 CRGB leds_C[NUM_LEDS_C];
 CRGB leds_A[NUM_LEDS_A];
 CRGB leds_L[NUM_LEDS_L];
@@ -190,6 +203,28 @@ void initTest()
     leds_L[i] = CRGB(0, 0, 0);
   }
   FastLED.show();
+  delay(1000);
+}
+
+void initDisplayNumber(CRGB* leds, int numLeds)
+{
+  Serial.printf("Init display number %i\n", config);
+  for (int n = 0; n < config+1; n++)
+  {
+    Serial.printf("Blink white %i for %i LEDs\n", n, numLeds);
+    for (int i = 0; i < numLeds; i++)
+    {
+      leds[i] = CRGB(127, 127, 127);
+    }
+    FastLED.show();
+    delay(1000);
+    for (int i = 0; i < numLeds; i++)
+    {
+      leds[i] = CRGB(0, 0, 0);
+    }
+    FastLED.show();
+    delay(1000);
+  }
 }
 
 void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *data)
@@ -341,30 +376,112 @@ CRGB getColors(int i, uint8_t *data)
   return CRGB(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
 }
 
+void modeDetect() {
+  // Configure GPIO 17 as input
+  pinMode(GPIO_17, INPUT_PULLUP);
+
+  // Configure GPIOs 16, 18, and 19 as outputs
+  pinMode(GPIO_16, OUTPUT);
+  pinMode(GPIO_18, OUTPUT);
+  pinMode(GPIO_19, OUTPUT);
+
+  // Initialize output pins to HIGH (disconnected state)
+  digitalWrite(GPIO_16, HIGH);
+  digitalWrite(GPIO_18, HIGH);
+  digitalWrite(GPIO_19, HIGH);
+
+  // Check connections
+  checkConnections();
+}
+
+void checkConnections() {
+  // Mode 1: Check if GPIO_16 and GPIO_17 are connected
+  digitalWrite(GPIO_16, LOW);
+  delay(100); // Small delay to stabilize the signal
+  bool mode1 = digitalRead(GPIO_17) == LOW;
+  digitalWrite(GPIO_16, HIGH);
+
+  // Mode 2: Check if GPIO_18 and GPIO_17 are connected
+  digitalWrite(GPIO_18, LOW);
+  delay(100);
+  bool mode2 = digitalRead(GPIO_17) == LOW;
+  digitalWrite(GPIO_18, HIGH);
+
+  // Mode 3: Check if GPIO_19 and GPIO_17 are connected
+  digitalWrite(GPIO_19, LOW);
+  delay(100);
+  bool mode3 = digitalRead(GPIO_17) == LOW;
+  digitalWrite(GPIO_19, HIGH);
+
+  // Set firmware mode accordingly
+  if (mode1) {
+    Serial.println("Mode 1 detected (GPIO 16 and GPIO 17 connected)");
+    setFirmwareMode(1);
+  } else if (mode2) {
+    Serial.println("Mode 2 detected (GPIO 18 and GPIO 17 connected)");
+    setFirmwareMode(2);
+  } else if (mode3) {
+    Serial.println("Mode 3 detected (GPIO 19 and GPIO 17 connected)");
+    setFirmwareMode(3);
+  } else {
+    Serial.println("No valid mode detected");
+  }
+}
+
+void setFirmwareMode(int mode) {
+  switch (mode) {
+    case 1:
+      Serial.println("Setting firmware to mode CIRCLE");
+      config = Mode::MODE_CIRCLE;
+      break;
+    case 2:
+      Serial.println("Setting firmware to mode ARROW");
+      config = Mode::MODE_ARROW;
+      break;
+    case 3:
+      Serial.println("Setting firmware to mode LASERSCISSORS");
+      config = Mode::MODE_LASERSCISSORS;
+      break;
+    default:
+      Serial.println("Unknown mode");
+      break;
+  }
+}
+
 void setup()
 {
+  // start logging
   Serial.begin(115200);
-  Serial.printf("MCU config is %i\n", config);
 
-  if (config == 1)
+  // detect mode via jumper
+  modeDetect();
+
+Serial.print("DATA_PIN: ");
+Serial.println(DATA_PIN);
+
+  Serial.printf("MCU config is %i\n", config);
+  if (config == Mode::MODE_CIRCLE)
   {
-    FastLED.addLeds<WS2813, dataPin, GRB>(leds_C, NUM_LEDS_C);
+    FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_C, NUM_LEDS_C);
     FastLED.setBrightness(255);
     initTest();
+    initDisplayNumber(leds_C, NUM_LEDS_C);
     startWifiAccessPoint();
   }
-  if (config == 2)
+  if (config == Mode::MODE_ARROW)
   {
-    FastLED.addLeds<WS2813, dataPin, GRB>(leds_A, NUM_LEDS_A);
+    FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_A, NUM_LEDS_A);
     FastLED.setBrightness(255);
     initTest();
+    initDisplayNumber(leds_A, NUM_LEDS_A);
     connectWifi(1);
   }
-  if (config == 3)
+  if (config == Mode::MODE_LASERSCISSORS)
   {
-    FastLED.addLeds<WS2813, dataPin, GRB>(leds_L, NUM_LEDS_L);
+    FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_L, NUM_LEDS_L);
     FastLED.setBrightness(255);
     initTest();
+    initDisplayNumber(leds_L, NUM_LEDS_L);
     connectWifi(2);
   }
   artnet.begin();
