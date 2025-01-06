@@ -13,7 +13,7 @@ Valid values:
 2 = Client 1 (192.168.1.31) Arrow (A)
 3 = Client 2 (192.168.1.32) Laser + Scissors (L)
 */
-const int config = 3;
+const int config = 1;
 
 // Configure IP addresses of the local access point
 IPAddress local_IP_AP(192, 168, 1, 22); // C strip
@@ -51,6 +51,12 @@ const int startUniverse = 0; // CHANGE FOR YOUR SETUP most software this is 1, s
 // Check if we got all universes
 const int maxUniverses = numberOfChannels / 512 + ((numberOfChannels % 512) ? 1 : 0);
 bool sendFrame = true;
+
+
+/* 
+ *  START
+ *  Code for Wi-Fi client(s)
+ */
 
 // connect to wifi – returns true if successful or false if not
 bool connectWifi(int clientNo = 1)
@@ -111,6 +117,43 @@ bool connectWifi(int clientNo = 1)
   return state;
 }
 
+/* 
+ *  END
+ *  Code for Wi-Fi client(s)
+ */
+
+
+/* 
+ *  START
+ *  Code for Wi-Fi access point
+ */
+void onWiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info)
+{
+  switch (event)
+  {
+  case WIFI_EVENT_AP_STACONNECTED:
+//    Serial.printf("Client connected! MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+//                  info.wifi_sta_connected.mac[0], info.wifi_sta_connected.mac[1], info.wifi_sta_connected.mac[2],
+//                  info.wifi_sta_connected.mac[3], info.wifi_sta_connected.mac[4], info.wifi_sta_connected.mac[5]);
+//    Serial.printf("AID = %d\n", info.wifi_ap_stadisconnected.aid); // AID is the Association ID
+  Serial.println("IP address: ");
+  Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
+    break;
+
+  case WIFI_EVENT_AP_STADISCONNECTED:
+//    Serial.printf("Client disconnected! MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+//                  info.wifi_ap_stadisconnected.mac[0], info.wifi_ap_stadisconnected.mac[1], info.wifi_ap_stadisconnected.mac[2],
+//                  info.wifi_ap_stadisconnected.mac[3], info.wifi_ap_stadisconnected.mac[4], info.wifi_ap_stadisconnected.mac[5]);
+//    Serial.printf("AID = %d\n", info.wifi_ap_stadisconnected.aid);
+  Serial.println("IP address: ");
+  Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
+    break;
+
+  default:
+    break;
+  }
+}
+
 bool startWifiAccessPoint()
 {
   Serial.print("Setting up Access Point ... ");
@@ -126,11 +169,19 @@ bool startWifiAccessPoint()
     Serial.println("Failed!");
     return false;
   }
+  
+  // Attach WiFi event handler
+  WiFi.onEvent(onWiFiEvent);
 
-  Serial.print("IP address = ");
+  Serial.print("Access point IP address: ");
   Serial.println(WiFi.softAPIP());
   return true;
 }
+
+/* 
+ *  END
+ *  Code for Wi-Fi access point
+ */
 
 void initTest()
 {
