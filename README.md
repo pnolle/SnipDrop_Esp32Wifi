@@ -28,3 +28,15 @@ Developed and tested with
 * FastLED version 3.5.0
 * ArtnetWifi version 1.5.1
 
+## Troubleshooting
+
+### Wi-Fi password not accepted
+Try typing it, don't copy. There might be invisible chars.
+
+### Wi-Fi password not accepted or other spooky things
+When typing the password didn't fix the issue, re-flashing the MCU with the option ``Tools / Erase All Flash Before Sketch Upload: Enabled`` in Arduino IDE helped. This will probably help for other weird issues as well, in case sth's gone sideways on the dev board.
+
+### Client doesn't get IP address via DHCP on Mac OS
+Go to ``System Settings => Wi-Fi => SnipDrop Details => TCP/IP => Renew DHCP Lease`` => Asks if unsaved changes shall be applied (even if nothing has been changed). For some reason, it doesn't renew when clicking ``Apply``, so click ``Don't Apply`` and enjoy your IP address.
+
+Via terminal, it should work with ``sudo ipconfig set en0 DHCP`` (given that en0 is your device interface).

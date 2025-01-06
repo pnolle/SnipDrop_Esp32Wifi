@@ -1,5 +1,5 @@
 /*
-Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
+  Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
 */
 #include <ArtnetWifi.h>
 #include <Arduino.h>
@@ -8,10 +8,10 @@ Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
 
 // Code configuration
 /*
-Valid values:
-1 = Access Point (192.168.1.22) + Circle (C)
-2 = Client 1 (192.168.1.31) Arrow (A)
-3 = Client 2 (192.168.1.32) Laser + Scissors (L)
+  Valid values:
+  1 = Access Point (192.168.1.22) + Circle (C)
+  2 = Client 1 (192.168.1.31) Arrow (A)
+  3 = Client 2 (192.168.1.32) Laser + Scissors (L)
 */
 const int config = 1;
 
@@ -156,19 +156,24 @@ void onWiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info)
 
 bool startWifiAccessPoint()
 {
+  WiFi.mode(WIFI_AP);
+  delay(250);
+
   Serial.print("Setting up Access Point ... ");
   Serial.println(WiFi.softAPConfig(local_IP_AP, gateway, subnet) ? "Ready" : "Failed!");
+  delay(250);
 
   Serial.print("Starting Access Point ... ");
   if (WiFi.softAP(ssid, password))
   {
-    Serial.println("Ready");
+    Serial.printf("Ready %s %s\n", ssid, password);
   }
   else
   {
     Serial.println("Failed!");
     return false;
   }
+  delay(250);
   
   // Attach WiFi event handler
   WiFi.onEvent(onWiFiEvent);
