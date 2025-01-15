@@ -1,8 +1,11 @@
-/*
+w/*
   Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
 */
-#include <ArtnetWifi.h>
+
 #include <Arduino.h>
+#include <Ethernet2.h> // Use Ethernet2 library for W5500
+#include <EthernetUdp2.h> // Udp support for Ethernet2
+#include <Artnet.h>
 #include <FastLED.h>
 #include "secrets.h" // local variables
 
@@ -14,6 +17,12 @@
   3 = Client 2 (192.168.1.32) Laser + Scissors (L)
 */
 const int config = 1;
+
+// Network settings
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; // MAC address
+IPAddress ip(192, 168, 1, 50);                      // Static IP (optional)
+EthernetUDP Udp;                                    // UDP instance (for Ethernet2)
+Artnet artnet;                                      // Artnet instance
 
 // Configure IP addresses of the local access point
 IPAddress local_IP_AP(192, 168, 1, 22); // C strip
@@ -31,111 +40,26 @@ const int NUM_LEDS_A = 452; // 452 leds_A in Arrow
 // const int NUM_LEDS_L = 646; // 646 leds_A in Laser v3 + Scissors, 585 in use without deadSpace
 const int NUM_LEDS_L = 627; // 646 leds_A in Laser v3 + Scissors, 585 in use without deadSpace
 
-const int START_UNIVERSE_A = 4;
-const int START_UNIVERSE_L = 7;
-
-const int pixelFactor = 3; // number of pixels displaying the same information to save universes
-
 const int numberOfChannels = (NUM_LEDS_C + NUM_LEDS_A + NUM_LEDS_L) * 3 / pixelFactor; // Total number of receive channels (1 led = 3 channels)
-const byte dataPin = 12;
+const byte DATA_PIN = 12;
 CRGB leds_C[NUM_LEDS_C];
 CRGB leds_A[NUM_LEDS_A];
 CRGB leds_L[NUM_LEDS_L];
 
-bool firstDmxFrameReceived = false;
-
-// Art-Net settings
+// Art-Net / DMX settings
 ArtnetWifi artnet;
 const int startUniverse = 0; // CHANGE FOR YOUR SETUP most software this is 1, some software send out artnet first universe as 0.
+
+const int START_UNIVERSE_A = 4;
+const int START_UNIVERSE_L = 7;
+const int pixelFactor = 3; // number of pixels displaying the same information to save universes
+bool firstDmxFrameReceived = false;
 
 // Check if we got all universes
 const int maxUniverses = numberOfChannels / 512 + ((numberOfChannels % 512) ? 1 : 0);
 bool sendFrame = true;
 
-// connect to wifi – returns true if successful or false if not
-bool connectWifi(int clientNo = 1)
-{
-  bool state = true;
-  int i = 0;
 
-  Serial.printf("Wi-Fi clientNo is %i\n", clientNo);
-
-  // Configures static IP address
-  if (clientNo == 1)
-  {
-    if (!WiFi.config(local_IP_C1, gateway, subnet, primaryDNS, secondaryDNS))
-    {
-      Serial.println("STA Failed to configure");
-    }
-  }
-  if (clientNo == 2)
-  {
-    if (!WiFi.config(local_IP_C2, gateway, subnet, primaryDNS, secondaryDNS))
-    {
-      Serial.println("STA Failed to configure");
-    }
-  }
-
-  WiFi.begin(ssid, password);
-  Serial.println("");
-  Serial.println("Connecting to WiFi");
-
-  // Wait for connection
-  Serial.print("Connecting");
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(500);
-    Serial.print(".");
-    if (i > 20)
-    {
-      state = false;
-      break;
-    }
-    i++;
-  }
-  if (state)
-  {
-    Serial.println("");
-    Serial.print("Connected to ");
-    Serial.println(ssid);
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-  }
-  else
-  {
-    Serial.println("");
-    Serial.println("Connection failed.");
-    connectWifi(clientNo);
-  }
-
-  return state;
-}
-
-bool startWifiAccessPoint()
-{
-  WiFi.mode(WIFI_AP);
-  delay(250);
-
-  Serial.print("Setting up Access Point ... ");
-  Serial.println(WiFi.softAPConfig(local_IP_AP, gateway, subnet) ? "Ready" : "Failed!");
-  delay(250);
-
-  Serial.print("Starting Access Point ... ");
-  if (WiFi.softAP(ssid, password))
-  {
-    Serial.printf("Ready %s %s\n", ssid, password);
-  }
-  else
-  {
-    Serial.println("Failed!");
-    return false;
-  }
-  delay(250);
-
-  Serial.print("IP address = ");
-  Serial.println(WiFi.softAPIP());
-  return true;
-}
 
 void initTest()
 {
@@ -203,6 +127,8 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
   {
     Serial.println("DMX reception started.");
     firstDmxFrameReceived = true;
+    Serial.printf("Number of clients on access point: %i\n", WiFi.softAPgetStationNum());
+
   }
 
   sendFrame = 1;
@@ -220,7 +146,7 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
   }
   uint8_t thisUniverse = universe - startUniverse;
 
-  // Serial.printf("onDmxFrame %u/%u %u %u %i %i\n", universe, maxUniverses, length, sequence, thisUniverse, sendFrame);
+  // Serial.printf("onDmxFrame %u/%u %u %u %i %i | %s %i\n", universe, maxUniverses, length, sequence, thisUniverse, sendFrame, "Number of clients on access point:", WiFi.softAPgetStationNum());
 
   // special treatment for L strip
   int leapLCounter = 0;
@@ -349,25 +275,29 @@ CRGB getColors(int i, uint8_t *data)
 void setup()
 {
   Serial.begin(115200);
+
+  Serial.println(ESP.getSdkVersion());
+  esp_log_level_set("*", ESP_LOG_VERBOSE);
+
   Serial.printf("MCU config is %i\n", config);
 
   if (config == 1)
   {
-    FastLED.addLeds<WS2813, dataPin, GRB>(leds_C, NUM_LEDS_C);
+    FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_C, NUM_LEDS_C);
     FastLED.setBrightness(255);
     initTest();
     startWifiAccessPoint();
   }
   if (config == 2)
   {
-    FastLED.addLeds<WS2813, dataPin, GRB>(leds_A, NUM_LEDS_A);
+    FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_A, NUM_LEDS_A);
     FastLED.setBrightness(255);
     initTest();
     connectWifi(1);
   }
   if (config == 3)
   {
-    FastLED.addLeds<WS2813, dataPin, GRB>(leds_L, NUM_LEDS_L);
+    FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_L, NUM_LEDS_L);
     FastLED.setBrightness(255);
     initTest();
     connectWifi(2);
