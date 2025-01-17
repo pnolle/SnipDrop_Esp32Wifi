@@ -4,14 +4,14 @@
 
 #include <Arduino.h>
 #include <Ethernet2.h>    // Use Ethernet2 library for W5500
-#include <EthernetUdp2.h> // Udp support for Ethernet2
-#include <Artnet.h>
+//#include <EthernetUdp2.h> // Udp support for Ethernet2
+//#include <Artnet.h>
 #include <FastLED.h>
 #include "secrets.h" // local variables
 
 // Network settings
 EthernetUDP Udp; // UDP instance (for Ethernet2)
-Artnet artnet;       // Artnet instance
+//Artnet artnet;       // Artnet instance
 
 // Declare MAC and IP variables
 byte mac[6];
@@ -25,6 +25,8 @@ IPAddress ip;
   3 = Laser + Scissors (L)
 */
 #define DEVICE_NUMBER 1
+
+const byte DATA_PIN = 12;
 
 #if DEVICE_NUMBER == 1
 byte mac1[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
@@ -58,8 +60,8 @@ const int NUM_LEDS_A = 452; // 452 leds_A in Arrow
 // const int NUM_LEDS_L = 646; // 646 leds_A in Laser v3 + Scissors, 585 in use without deadSpace
 const int NUM_LEDS_L = 627; // 646 leds_A in Laser v3 + Scissors, 585 in use without deadSpace
 
+const int pixelFactor = 3; // number of pixels displaying the same information to save universes
 const int numberOfChannels = (NUM_LEDS_C + NUM_LEDS_A + NUM_LEDS_L) * 3 / pixelFactor; // Total number of receive channels (1 led = 3 channels)
-const byte DATA_PIN = 12;
 CRGB leds_C[NUM_LEDS_C];
 CRGB leds_A[NUM_LEDS_A];
 CRGB leds_L[NUM_LEDS_L];
@@ -69,7 +71,7 @@ const int startUniverse = 0; // CHANGE FOR YOUR SETUP most software this is 1, s
 
 const int START_UNIVERSE_A = 4;
 const int START_UNIVERSE_L = 7;
-const int pixelFactor = 3; // number of pixels displaying the same information to save universes
+
 bool firstDmxFrameReceived = false;
 
 // Check if we got all universes
@@ -353,10 +355,10 @@ void ledSetup()
     FastLED.setBrightness(255);
     initTest();
   }
-  artnet.begin(Ethernet.localIP(), &Udp);
-
-  // this will be called for each packet received
-  artnet.setArtDmxCallback(onDmxFrame);
+//  artnet.begin(Ethernet.localIP(), &Udp);
+//
+//  // this will be called for each packet received
+//  artnet.setArtDmxCallback(onDmxFrame);
 }
 
 void setup()
@@ -368,6 +370,6 @@ void setup()
 
 void loop()
 {
-  // we call the read function inside the loop
-  artnet.read();
+//  // we call the read function inside the loop
+//  artnet.read();
 }
