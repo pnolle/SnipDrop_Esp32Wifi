@@ -1,17 +1,18 @@
 /*
    Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
- */
+*/
 
 #include <Arduino.h>
-#include <Ethernet2.h>    // Use Ethernet2 library for W5500
+#include <Artnet.h>
+#include <ArtnetEther.h>
+//#include <Ethernet2.h>    // Use Ethernet2 library for W5500
 //#include <EthernetUdp2.h> // Udp support for Ethernet2
-//#include <Artnet.h>
 #include <FastLED.h>
 #include "secrets.h" // local variables
 
 // Network settings
-EthernetUDP Udp; // UDP instance (for Ethernet2)
-//Artnet artnet;       // Artnet instance
+//EthernetUDP Udp; // UDP instance (for Ethernet2)
+ArtnetReceiver artnet;
 
 // Declare MAC and IP variables
 byte mac[6];
@@ -288,26 +289,27 @@ CRGB getColors(int i, uint8_t *data)
 }
 
 /*
- * Setup logging and ethernet
- */
+   Setup logging and ethernet
+*/
 void basicSetup()
 {
+  Serial.print("BASIC SETUP");
   Serial.println(ESP.getSdkVersion());
   esp_log_level_set("*", ESP_LOG_VERBOSE);
 
   Serial.printf("MCU DEVICE_NUMBER is %i\n", DEVICE_NUMBER);
 
   // Assign MAC and IP based on DEVICE_NUMBER
-  #if DEVICE_NUMBER == 1
-    memcpy(mac, mac1, sizeof(mac1));
-    ip = ip1;
-  #elif DEVICE_NUMBER == 2
-    memcpy(mac, mac2, sizeof(mac2));
-    ip = ip2;
-  #elif DEVICE_NUMBER == 3
-    memcpy(mac, mac3, sizeof(mac3));
-    ip = ip3;
-  #endif
+#if DEVICE_NUMBER == 1
+  memcpy(mac, mac1, sizeof(mac1));
+  ip = ip1;
+#elif DEVICE_NUMBER == 2
+  memcpy(mac, mac2, sizeof(mac2));
+  ip = ip2;
+#elif DEVICE_NUMBER == 3
+  memcpy(mac, mac3, sizeof(mac3));
+  ip = ip3;
+#endif
 
   Serial.println("Device Configuration:");
   Serial.print("MAC: ");
@@ -333,10 +335,11 @@ void basicSetup()
 }
 
 /*
- * Setup FastLED and artnet
- */
+   Setup FastLED and artnet
+*/
 void ledSetup()
 {
+  Serial.print("LED SETUP");
   if (DEVICE_NUMBER == 1)
   {
     FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_C, NUM_LEDS_C);
@@ -355,21 +358,22 @@ void ledSetup()
     FastLED.setBrightness(255);
     initTest();
   }
-//  artnet.begin(Ethernet.localIP(), &Udp);
-//
-//  // this will be called for each packet received
+  artnet.begin();
+
+  // this will be called for each packet received
 //  artnet.setArtDmxCallback(onDmxFrame);
 }
 
 void setup()
 {
   Serial.begin(115200);
+  Serial.print("SETUP");
   basicSetup();
   ledSetup();
 }
 
 void loop()
 {
-//  // we call the read function inside the loop
-//  artnet.read();
+    // we call the read function inside the loop
+    artnet.parse();
 }
