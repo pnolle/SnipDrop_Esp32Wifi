@@ -1,28 +1,46 @@
-w/*
-  Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
-*/
+/*
+   Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
+ */
 
 #include <Arduino.h>
-#include <Ethernet2.h> // Use Ethernet2 library for W5500
+#include <Ethernet2.h>    // Use Ethernet2 library for W5500
 #include <EthernetUdp2.h> // Udp support for Ethernet2
 #include <Artnet.h>
 #include <FastLED.h>
 #include "secrets.h" // local variables
 
-// Code configuration
+// Network settings
+EthernetUDP Udp; // UDP instance (for Ethernet2)
+Artnet artnet;       // Artnet instance
+
+// Declare MAC and IP variables
+byte mac[6];
+IPAddress ip;
+
+// Device configuration
 /*
   Valid values:
-  1 = Access Point (192.168.1.22) + Circle (C)
-  2 = Client 1 (192.168.1.31) Arrow (A)
-  3 = Client 2 (192.168.1.32) Laser + Scissors (L)
+  1 = Circle (C)
+  2 = Arrow (A)
+  3 = Laser + Scissors (L)
 */
-const int config = 1;
+#define DEVICE_NUMBER 1
 
-// Network settings
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; // MAC address
-IPAddress ip(192, 168, 1, 50);                      // Static IP (optional)
-EthernetUDP Udp;                                    // UDP instance (for Ethernet2)
-Artnet artnet;                                      // Artnet instance
+#if DEVICE_NUMBER == 1
+byte mac1[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
+IPAddress ip1(192, 168, 1, 50);
+
+#elif DEVICE_NUMBER == 2
+byte mac2[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE};
+IPAddress ip2(192, 168, 1, 51);
+
+#elif DEVICE_NUMBER == 3
+byte mac3[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEF};
+IPAddress ip3(192, 168, 1, 52);
+
+#else
+#error "Invalid DEVICE_NUMBER. Please define as 1, 2, or 3."
+#endif
 
 // Configure IP addresses of the local access point
 IPAddress local_IP_AP(192, 168, 1, 22); // C strip
@@ -47,7 +65,6 @@ CRGB leds_A[NUM_LEDS_A];
 CRGB leds_L[NUM_LEDS_L];
 
 // Art-Net / DMX settings
-ArtnetWifi artnet;
 const int startUniverse = 0; // CHANGE FOR YOUR SETUP most software this is 1, some software send out artnet first universe as 0.
 
 const int START_UNIVERSE_A = 4;
@@ -59,11 +76,9 @@ bool firstDmxFrameReceived = false;
 const int maxUniverses = numberOfChannels / 512 + ((numberOfChannels % 512) ? 1 : 0);
 bool sendFrame = true;
 
-
-
 void initTest()
 {
-  Serial.printf("Init test %i\n", config);
+  Serial.printf("Init test %i\n", DEVICE_NUMBER);
   for (int i = 0; i < NUM_LEDS_C; i++)
   {
     leds_C[i] = CRGB(127, 0, 0);
@@ -127,8 +142,6 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
   {
     Serial.println("DMX reception started.");
     firstDmxFrameReceived = true;
-    Serial.printf("Number of clients on access point: %i\n", WiFi.softAPgetStationNum());
-
   }
 
   sendFrame = 1;
@@ -145,8 +158,6 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
     return;
   }
   uint8_t thisUniverse = universe - startUniverse;
-
-  // Serial.printf("onDmxFrame %u/%u %u %u %i %i | %s %i\n", universe, maxUniverses, length, sequence, thisUniverse, sendFrame, "Number of clients on access point:", WiFi.softAPgetStationNum());
 
   // special treatment for L strip
   int leapLCounter = 0;
@@ -184,14 +195,15 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
         led++;
       }
     }
-    else if (thisUniverse >= START_UNIVERSE_L)  // this is the L strip on universe 7
+    else if (thisUniverse >= START_UNIVERSE_L) // this is the L strip on universe 7
     {
       int led = i * pixelFactor + ((thisUniverse - START_UNIVERSE_L) * 170) + leapLCounter; // for thisUniverse==7 ? led start at 0 : <nothing else>
       // if (led==509) Serial.printf("L-STRIP from %i to infinityyy! \tled%i/%i %u/%u-%i %u %u %i %i\n", START_UNIVERSE_L, led, NUM_LEDS_L, universe, maxUniverses, START_UNIVERSE_L, length, sequence, thisUniverse, sendFrame);
 
       // special treatment for the L strip because uses 585 leds, which is 75 longer than 3*170 (=510): add 1 extra LED every 2nd time
       int thisPixelFactor = pixelFactor;
-      if (leapLNow == 2) {
+      if (leapLNow == 2)
+      {
         thisPixelFactor++;
         leapLNow = 0;
         leapLCounter++;
@@ -217,7 +229,8 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t *d
   }
 }
 
-int addDeadSpace(int led) {
+int addDeadSpace(int led)
+{
   int deadSpace = 0;
   if (led > 19)
   {
@@ -227,7 +240,7 @@ int addDeadSpace(int led) {
   {
     deadSpace += 6;
   }
-  if (led > 65) //3
+  if (led > 65) // 3
   {
     deadSpace += 5;
   }
@@ -239,7 +252,7 @@ int addDeadSpace(int led) {
   {
     deadSpace += 5;
   }
-  if (led > 138)  //6
+  if (led > 138) // 6
   {
     deadSpace += 6;
   }
@@ -272,40 +285,85 @@ CRGB getColors(int i, uint8_t *data)
   return CRGB(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
 }
 
-void setup()
+/*
+ * Setup logging and ethernet
+ */
+void basicSetup()
 {
-  Serial.begin(115200);
-
   Serial.println(ESP.getSdkVersion());
   esp_log_level_set("*", ESP_LOG_VERBOSE);
 
-  Serial.printf("MCU config is %i\n", config);
+  Serial.printf("MCU DEVICE_NUMBER is %i\n", DEVICE_NUMBER);
 
-  if (config == 1)
+  // Assign MAC and IP based on DEVICE_NUMBER
+  #if DEVICE_NUMBER == 1
+    memcpy(mac, mac1, sizeof(mac1));
+    ip = ip1;
+  #elif DEVICE_NUMBER == 2
+    memcpy(mac, mac2, sizeof(mac2));
+    ip = ip2;
+  #elif DEVICE_NUMBER == 3
+    memcpy(mac, mac3, sizeof(mac3));
+    ip = ip3;
+  #endif
+
+  Serial.println("Device Configuration:");
+  Serial.print("MAC: ");
+  for (int i = 0; i < 6; i++)
+  {
+    Serial.print(mac[i], HEX);
+    if (i < 5)
+      Serial.print(":");
+  }
+  Serial.println();
+  Serial.print("IP: ");
+  Serial.println(ip);
+
+  // Initialize Ethernet with assigned MAC and IP
+  if (Ethernet.begin(mac) == 0)
+  {
+    Serial.println("DHCP failed, using static IP.");
+    Ethernet.begin(mac, ip);
+  }
+
+  Serial.print("Ethernet IP: ");
+  Serial.println(Ethernet.localIP());
+}
+
+/*
+ * Setup FastLED and artnet
+ */
+void ledSetup()
+{
+  if (DEVICE_NUMBER == 1)
   {
     FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_C, NUM_LEDS_C);
     FastLED.setBrightness(255);
     initTest();
-    startWifiAccessPoint();
   }
-  if (config == 2)
+  if (DEVICE_NUMBER == 2)
   {
     FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_A, NUM_LEDS_A);
     FastLED.setBrightness(255);
     initTest();
-    connectWifi(1);
   }
-  if (config == 3)
+  if (DEVICE_NUMBER == 3)
   {
     FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_L, NUM_LEDS_L);
     FastLED.setBrightness(255);
     initTest();
-    connectWifi(2);
   }
-  artnet.begin();
+  artnet.begin(Ethernet.localIP(), &Udp);
 
   // this will be called for each packet received
   artnet.setArtDmxCallback(onDmxFrame);
+}
+
+void setup()
+{
+  Serial.begin(115200);
+  basicSetup();
+  ledSetup();
 }
 
 void loop()
