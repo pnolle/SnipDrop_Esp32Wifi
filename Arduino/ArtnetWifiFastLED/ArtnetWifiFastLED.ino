@@ -293,7 +293,7 @@ CRGB getColors(int i, uint8_t *data)
 */
 void basicSetup()
 {
-  Serial.print("BASIC SETUP");
+  Serial.println("BASIC SETUP");
   Serial.println(ESP.getSdkVersion());
   esp_log_level_set("*", ESP_LOG_VERBOSE);
 
@@ -339,7 +339,7 @@ void basicSetup()
 */
 void ledSetup()
 {
-  Serial.print("LED SETUP");
+  Serial.println("LED SETUP");
   if (DEVICE_NUMBER == 1)
   {
     FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_C, NUM_LEDS_C);
@@ -367,8 +367,8 @@ void ledSetup()
 void setup()
 {
   Serial.begin(115200);
-  Serial.print("SETUP");
-  basicSetup();
+  Serial.println("SETUP");
+//  basicSetup();
   ledSetup();
 }
 
