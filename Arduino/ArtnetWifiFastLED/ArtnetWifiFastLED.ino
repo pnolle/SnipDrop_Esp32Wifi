@@ -3,11 +3,12 @@
 */
 
 #include <Arduino.h>
+#include <FastLED.h>
 #include <Artnet.h>
 #include <ArtnetEther.h>
+//#include <Ethernet.h>
 //#include <Ethernet2.h>    // Use Ethernet2 library for W5500
 //#include <EthernetUdp2.h> // Udp support for Ethernet2
-#include <FastLED.h>
 #include "secrets.h" // local variables
 
 // Network settings
@@ -15,8 +16,8 @@
 ArtnetReceiver artnet;
 
 // Declare MAC and IP variables
-byte mac[6];
-IPAddress ip;
+//byte mac[6];
+//IPAddress ip;
 
 // Device configuration
 /*
@@ -31,7 +32,7 @@ const byte DATA_PIN = 12;
 
 #if DEVICE_NUMBER == 1
 byte mac1[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
-IPAddress ip1(192, 168, 1, 50);
+IPAddress ip1(192, 168, 1, 22);
 
 #elif DEVICE_NUMBER == 2
 byte mac2[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xEE};
@@ -45,10 +46,10 @@ IPAddress ip3(192, 168, 1, 52);
 #error "Invalid DEVICE_NUMBER. Please define as 1, 2, or 3."
 #endif
 
-// Configure IP addresses of the local access point
-IPAddress local_IP_AP(192, 168, 1, 22); // C strip
-IPAddress local_IP_C1(192, 168, 1, 31); // A strip
-IPAddress local_IP_C2(192, 168, 1, 32); // L strip
+//// Configure IP addresses of the local access point
+//IPAddress local_IP_AP(192, 168, 1, 22); // C strip
+//IPAddress local_IP_C1(192, 168, 1, 31); // A strip
+//IPAddress local_IP_C2(192, 168, 1, 32); // L strip
 
 IPAddress gateway(192, 168, 1, 5);
 IPAddress subnet(255, 255, 255, 0);
@@ -78,6 +79,18 @@ bool firstDmxFrameReceived = false;
 // Check if we got all universes
 const int maxUniverses = numberOfChannels / 512 + ((numberOfChannels % 512) ? 1 : 0);
 bool sendFrame = true;
+
+
+void callback(const uint8_t *data, uint16_t size, const ArtDmxMetadata &metadata, const ArtNetRemoteInfo &remote) {
+    for (size_t pixel = 0; pixel < NUM_LEDS_C; ++pixel) {
+        size_t idx = pixel * 3;
+        leds_C[pixel].r = data[idx + 0];
+        leds_C[pixel].g = data[idx + 1];
+        leds_C[pixel].b = data[idx + 2];
+    }
+    FastLED.show();
+}
+
 
 void initTest()
 {
@@ -290,49 +303,49 @@ CRGB getColors(int i, uint8_t *data)
 
 /*
    Setup logging and ethernet
-*/
-void basicSetup()
-{
-  Serial.println("BASIC SETUP");
-  Serial.println(ESP.getSdkVersion());
-  esp_log_level_set("*", ESP_LOG_VERBOSE);
-
-  Serial.printf("MCU DEVICE_NUMBER is %i\n", DEVICE_NUMBER);
-
-  // Assign MAC and IP based on DEVICE_NUMBER
-#if DEVICE_NUMBER == 1
-  memcpy(mac, mac1, sizeof(mac1));
-  ip = ip1;
-#elif DEVICE_NUMBER == 2
-  memcpy(mac, mac2, sizeof(mac2));
-  ip = ip2;
-#elif DEVICE_NUMBER == 3
-  memcpy(mac, mac3, sizeof(mac3));
-  ip = ip3;
-#endif
-
-  Serial.println("Device Configuration:");
-  Serial.print("MAC: ");
-  for (int i = 0; i < 6; i++)
-  {
-    Serial.print(mac[i], HEX);
-    if (i < 5)
-      Serial.print(":");
-  }
-  Serial.println();
-  Serial.print("IP: ");
-  Serial.println(ip);
-
-  // Initialize Ethernet with assigned MAC and IP
-  if (Ethernet.begin(mac) == 0)
-  {
-    Serial.println("DHCP failed, using static IP.");
-    Ethernet.begin(mac, ip);
-  }
-
-  Serial.print("Ethernet IP: ");
-  Serial.println(Ethernet.localIP());
-}
+//*/
+//void basicSetup()
+//{
+//  Serial.println("BASIC SETUP");
+//  Serial.println(ESP.getSdkVersion());
+//  esp_log_level_set("*", ESP_LOG_VERBOSE);
+//
+//  Serial.printf("MCU DEVICE_NUMBER is %i\n", DEVICE_NUMBER);
+//
+//  // Assign MAC and IP based on DEVICE_NUMBER
+//#if DEVICE_NUMBER == 1
+//  memcpy(mac, mac1, sizeof(mac1));
+//  ip = ip1;
+//#elif DEVICE_NUMBER == 2
+//  memcpy(mac, mac2, sizeof(mac2));
+//  ip = ip2;
+//#elif DEVICE_NUMBER == 3
+//  memcpy(mac, mac3, sizeof(mac3));
+//  ip = ip3;
+//#endif
+//
+//  Serial.println("Device Configuration:");
+//  Serial.print("MAC: ");
+//  for (int i = 0; i < 6; i++)
+//  {
+//    Serial.print(mac[i], HEX);
+//    if (i < 5)
+//      Serial.print(":");
+//  }
+//  Serial.println();
+//  Serial.print("IP: ");
+//  Serial.println(ip);
+//
+//  // Initialize Ethernet with assigned MAC and IP
+//  if (Ethernet.begin(mac) == 0)
+//  {
+//    Serial.println("DHCP failed, using static IP.");
+//    Ethernet.begin(mac, ip);
+//  }
+//
+//  Serial.print("Ethernet IP: ");
+//  Serial.println(Ethernet.localIP());
+//}
 
 /*
    Setup FastLED and artnet
@@ -342,9 +355,36 @@ void ledSetup()
   Serial.println("LED SETUP");
   if (DEVICE_NUMBER == 1)
   {
+    // Initialize Ethernet with static IP
+    Serial.println("Initializing Ethernet...");
+    Ethernet.begin(mac1, ip1);
+    
+    Serial.print("Ethernet hardware status: ");
+    Serial.println(Ethernet.hardwareStatus());
+    Serial.print("Ethernet link status: ");
+    Serial.println(Ethernet.linkStatus());
+    delay(1000);
+    Serial.println(Ethernet.localIP());
+
+    // temporarily disabling Ethernet SPI
+    pinMode(10, OUTPUT);
+    digitalWrite(10, HIGH); // Deselect Ethernet SPI
+    
     FastLED.addLeds<WS2813, DATA_PIN, GRB>(leds_C, NUM_LEDS_C);
     FastLED.setBrightness(255);
     initTest();
+    
+    if (Ethernet.localIP() != INADDR_NONE) {
+        artnet.begin();
+        // Use manual callback if `forwardArtDmxDataToFastLED` is unavailable
+        artnet.subscribeArtDmxUniverse(0, callback); // Use correct universe number
+    } else {
+        Serial.println("Ethernet initialization failed!");
+    }
+
+    // if Artnet packet comes to this universe, forward them to fastled directly
+    //    artnet.forwardArtDmxDataToFastLED(0, leds_C, NUM_LEDS_C);
+    //    artnet.forwardArtDmxDataToFastLED(universe, leds_C, NUM_LEDS_C);
   }
   if (DEVICE_NUMBER == 2)
   {
@@ -358,10 +398,6 @@ void ledSetup()
     FastLED.setBrightness(255);
     initTest();
   }
-  artnet.begin();
-
-  // this will be called for each packet received
-//  artnet.setArtDmxCallback(onDmxFrame);
 }
 
 void setup()
