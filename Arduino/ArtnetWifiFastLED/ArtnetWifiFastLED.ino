@@ -43,6 +43,7 @@ CRGB leds_A[NUM_LEDS_A];
 CRGB leds_L[NUM_LEDS_L];
 
 bool firstDmxFrameReceived = false;
+static unsigned long lastPrintTime = 0;
 
 // Art-Net settings
 ArtnetWifi artnet;
@@ -132,20 +133,22 @@ void onWiFiEvent(WiFiEvent_t event, WiFiEventInfo_t info)
   switch (event)
   {
   case WIFI_EVENT_AP_STACONNECTED:
+    Serial.println("WIFI_EVENT_AP_STACONNECTED");
 //    Serial.printf("Client connected! MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
 //                  info.wifi_sta_connected.mac[0], info.wifi_sta_connected.mac[1], info.wifi_sta_connected.mac[2],
 //                  info.wifi_sta_connected.mac[3], info.wifi_sta_connected.mac[4], info.wifi_sta_connected.mac[5]);
 //    Serial.printf("AID = %d\n", info.wifi_ap_stadisconnected.aid); // AID is the Association ID
-  Serial.println("IP address: ");
+  Serial.println("IP address connected: ");
   Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
     break;
 
   case WIFI_EVENT_AP_STADISCONNECTED:
+  Serial.print("WIFI_EVENT_AP_STADISCONNECTED");
 //    Serial.printf("Client disconnected! MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
 //                  info.wifi_ap_stadisconnected.mac[0], info.wifi_ap_stadisconnected.mac[1], info.wifi_ap_stadisconnected.mac[2],
 //                  info.wifi_ap_stadisconnected.mac[3], info.wifi_ap_stadisconnected.mac[4], info.wifi_ap_stadisconnected.mac[5]);
 //    Serial.printf("AID = %d\n", info.wifi_ap_stadisconnected.aid);
-  Serial.println("IP address: ");
+  Serial.println("IP address disconnected: ");
   Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
     break;
 
@@ -429,8 +432,21 @@ void setup()
   artnet.setArtDmxCallback(onDmxFrame);
 }
 
+void printConnectedClients()
+{
+  int numClients = WiFi.softAPgetStationNum();
+  Serial.printf("Number of connected clients: %d\n", numClients);
+}
+
 void loop()
 {
   // we call the read function inside the loop
   artnet.read();
+  
+  // Print the number of connected clients every 5 seconds
+  if (config == 1 && millis() - lastPrintTime >= 5000)
+  {
+    printConnectedClients();
+    lastPrintTime = millis();
+  }
 }
