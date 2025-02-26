@@ -211,7 +211,7 @@ void initDisplayNumber(CRGB* leds, int numLeds)
   Serial.printf("Init display number %i\n", config);
   for (int n = 0; n < config+1; n++)
   {
-    Serial.printf("Blink white %i for %i LEDs\n", n, numLeds);
+    Serial.printf("Blink white %i times for %i LEDs\n", n+1, numLeds);
     for (int i = 0; i < numLeds; i++)
     {
       leds[i] = CRGB(127, 127, 127);
