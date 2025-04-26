@@ -2,6 +2,9 @@
 Code for Wi-Fi access point and clients for my LED rollup banner project 'SnipDrop'.
 http://snippetupperlaser.com
 
+## Discontinued
+Needed to switch to PlatformIO when implementing Ethernet instead of WiFi. Using the W5500 ethernet shield came with specific requirements to library versions that were way easier to handle with PlatformIO. Please refer to [this repository](https://github.com/pnolle/SnipDrop_Esp32Eth_PlatformIO.git) for the code implementing the W5500 ethernet shield and further development.
+
 ## How it works
 * Ableton Live (or any other DAW) sends out MIDI
 * Qlc+ receives MIDI and has mappings to a bunch of functions, matrices etc.
